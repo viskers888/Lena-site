@@ -28,6 +28,44 @@
     font-family: 'Montserrat', sans-serif;
     font-weight: 300;
     overflow-x: hidden;
+    transition: background 0.8s ease;
+  }
+
+  /* BACKGROUND THEMES */
+  body.theme-aurora {
+    background: linear-gradient(135deg, #0a0e27 0%, #1a0f35 25%, #2d0a4e 50%, #0f3a5f 75%, #0a1e2e 100%);
+    background-attachment: fixed;
+  }
+
+  body.theme-cosmos {
+    background: radial-gradient(ellipse at 20% 50%, rgba(147, 51, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+                linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%);
+    background-attachment: fixed;
+  }
+
+  body.theme-mystical {
+    background:
+      radial-gradient(circle at 25% 30%, rgba(124, 58, 255, 0.25) 0%, transparent 40%),
+      radial-gradient(circle at 75% 70%, rgba(168, 85, 247, 0.2) 0%, transparent 45%),
+      linear-gradient(135deg, #1a0f35 0%, #0d1b2a 50%, #1a0a2e 100%);
+    background-attachment: fixed;
+  }
+
+  body.theme-emerald {
+    background:
+      radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 60% 60%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+      linear-gradient(135deg, #0f2f2f 0%, #1a3a3a 50%, #0d2b2b 100%);
+    background-attachment: fixed;
+  }
+
+  body.theme-sunset {
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(251, 146, 60, 0.25) 0%, transparent 40%),
+      radial-gradient(ellipse at 70% 40%, rgba(236, 72, 153, 0.2) 0%, transparent 45%),
+      linear-gradient(135deg, #1f1015 0%, #2d1b3d 50%, #1a0f2e 100%);
+    background-attachment: fixed;
   }
 
   /* NAV */
@@ -39,8 +77,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(to bottom, rgba(14,11,8,0.95), transparent);
-    backdrop-filter: blur(2px);
+    background: linear-gradient(to bottom, rgba(14,11,8,0.9), transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(201, 168, 76, 0.1);
   }
 
   .nav-logo {
@@ -341,6 +380,7 @@
 
   .service-card:hover {
     background: var(--dark3);
+    backdrop-filter: blur(16px);
   }
 
   .service-icon {
@@ -421,6 +461,11 @@
     font-size: 1.1rem;
     color: var(--gold-pale);
     font-style: italic;
+    background: rgba(14, 11, 8, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 12px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(201, 168, 76, 0.3);
   }
 
   /* REVIEWS */
@@ -617,6 +662,89 @@
     opacity: 1;
     transform: translateY(0);
   }
+
+  /* GLASSMORPHISM EFFECTS */
+  .glass {
+    background: rgba(14, 11, 8, 0.6) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 1px solid rgba(201, 168, 76, 0.25) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+    transition: all 0.4s ease;
+  }
+
+  .glass:hover {
+    background: rgba(14, 11, 8, 0.75) !important;
+    border-color: rgba(201, 168, 76, 0.45) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 15px 50px rgba(201, 168, 76, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+  }
+
+  .service-card.glass {
+    background: rgba(26, 21, 16, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(201, 168, 76, 0.2) !important;
+  }
+
+  .review-card.glass {
+    background: rgba(14, 11, 8, 0.65) !important;
+    backdrop-filter: blur(14px) !important;
+    border: 1px solid rgba(201, 168, 76, 0.3) !important;
+  }
+
+  .bracelet-card.glass img {
+    position: relative;
+  }
+
+  /* THEME SWITCHER BUTTON */
+  .theme-switcher {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    display: flex;
+    gap: 10px;
+    z-index: 999;
+    background: rgba(14, 11, 8, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 15px;
+    border-radius: 50px;
+    border: 1px solid rgba(201, 168, 76, 0.3);
+    flex-wrap: wrap;
+    max-width: 200px;
+  }
+
+  .theme-btn {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid rgba(201, 168, 76, 0.5);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .theme-btn:hover {
+    border-color: var(--gold-light);
+    transform: scale(1.2);
+  }
+
+  .theme-btn.active {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+
+  @media (max-width: 640px) {
+    .theme-switcher {
+      bottom: 20px;
+      right: 20px;
+      gap: 6px;
+      padding: 10px;
+      max-width: 150px;
+    }
+    .theme-btn {
+      width: 10px;
+      height: 10px;
+    }
+  }
 </style>
 </head>
 <body>
@@ -674,22 +802,22 @@
       <h2 class="section-title">Услуги</h2>
     </div>
     <div class="services-grid">
-      <div class="service-card fade-in">
+      <div class="service-card glass fade-in">
         <span class="service-icon">🔮</span>
         <h3 class="service-title">Таро</h3>
         <p class="service-desc">Расклады на актуальные вопросы жизни — отношения, работа, здоровье, деньги. Честный ответ без прикрас.</p>
       </div>
-      <div class="service-card fade-in">
+      <div class="service-card glass fade-in">
         <span class="service-icon">🌀</span>
         <h3 class="service-title">Работа через поле</h3>
         <p class="service-desc">Считывание вашего энергетического поля, выявление блоков и искажений, которые мешают жить полноценно.</p>
       </div>
-      <div class="service-card fade-in">
+      <div class="service-card glass fade-in">
         <span class="service-icon">✨</span>
         <h3 class="service-title">Метаразбор</h3>
         <p class="service-desc">Глубинный анализ жизненной ситуации через считывание поля. Помогаю увидеть скрытые причины и найти выход.</p>
       </div>
-      <div class="service-card fade-in">
+      <div class="service-card glass fade-in">
         <span class="service-icon">🔥</span>
         <h3 class="service-title">Чистки</h3>
         <p class="service-desc">Энергетические чистки пространства и человека. Снятие негативных программ, восстановление баланса.</p>
@@ -737,27 +865,27 @@
       <h2 class="section-title">Отзывы</h2>
     </div>
     <div class="reviews-grid">
-      <div class="review-card fade-in">
+      <div class="review-card glass fade-in">
         <div class="stars">★ ★ ★ ★ ★</div>
         <p class="review-text">Елена! Спасибо большое за вашу работу! Я не знаю как это связано, но именно после начала работы с вами у меня появилась энергия! Я стала лучше спать, наладился сон — раньше он был очень беспорядочный. Головные боли ушли! Появилась энергия на спорт и на работу! Как-то всё само собой стало складываться. Я уверена что это ваша заслуга, спасибо Вам большое!!</p>
         <p class="review-author">— Виктория</p>
       </div>
-      <div class="review-card fade-in">
+      <div class="review-card glass fade-in">
         <div class="stars">★ ★ ★ ★ ★</div>
         <p class="review-text">Честно, я очень скептически отношусь к такому, но вы меня очень быстро переубедили! Я не ожидала, что карты могут знать мои чувства — это невероятно. Всё что разложили, было правдой, всё в точку. Вы рассказали то, что я сама не хотела принимать и убегала от этого. Теперь благодаря вам я знаю как и что делать. Спасибо большое!</p>
         <p class="review-author">— Без имени (по просьбе)</p>
       </div>
-      <div class="review-card fade-in">
+      <div class="review-card glass fade-in">
         <div class="stars">★ ★ ★ ★ ★</div>
         <p class="review-text">Спасибо большое. Мне нечего добавить и исправить — все 100% про меня. Да, действительно я многое держу в себе, чтоб не обидеть человека. Многое скрываю и не доверяю, потому что предавали. И действительно всё так, как вы сказали. Благодарю.</p>
         <p class="review-author">— Кристина</p>
       </div>
-      <div class="review-card fade-in">
+      <div class="review-card glass fade-in">
         <div class="stars">★ ★ ★ ★ ★</div>
         <p class="review-text">Ленуся, муж говорит — было состояние расслабленности, как после бани. Но САМОЕ ГЛАВНОЕ: у него полностью спал отёк с ноги! Он был 24/7, нога болела всегда. Сейчас на пальцах руки совсем немного, а на ноге — ПОЛНОСТЬЮ ПРОШЁЛ. И боли нет совсем!!! Благодарю тебя миллион раз!</p>
         <p class="review-author">— Юлия, Казахстан</p>
       </div>
-      <div class="review-card fade-in">
+      <div class="review-card glass fade-in">
         <div class="stars">★ ★ ★ ★ ★</div>
         <p class="review-text">Понравилось, даже более чем! Классно смотрит, аж плакать захотелось — не могу пока среди людей, приеду — поплачу. Всё в точку, всё что сейчас происходит в жизни — всё увидела. Ещё раз спасибо и молодец!</p>
         <p class="review-author">— Ира</p>
@@ -791,6 +919,16 @@
   <p>Таро · Поле · Метаразбор · Чистки</p>
 </footer>
 
+<!-- THEME SWITCHER -->
+<div class="theme-switcher">
+  <button class="theme-btn active" data-theme="default" title="Default"></button>
+  <button class="theme-btn" data-theme="aurora" title="Aurora"></button>
+  <button class="theme-btn" data-theme="cosmos" title="Cosmos"></button>
+  <button class="theme-btn" data-theme="mystical" title="Mystical"></button>
+  <button class="theme-btn" data-theme="emerald" title="Emerald"></button>
+  <button class="theme-btn" data-theme="sunset" title="Sunset"></button>
+</div>
+
 <script>
   // Fade-in on scroll
   const observer = new IntersectionObserver((entries) => {
@@ -802,6 +940,37 @@
   }, { threshold: 0.1 });
 
   document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  // Theme Switcher
+  const themeButtons = document.querySelectorAll('.theme-btn');
+  const savedTheme = localStorage.getItem('oda-theme') || 'default';
+
+  // Set initial theme
+  if (savedTheme !== 'default') {
+    document.body.classList.add(`theme-${savedTheme}`);
+    document.querySelector(`[data-theme="${savedTheme}"]`).classList.add('active');
+  }
+
+  themeButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const theme = btn.dataset.theme;
+
+      // Remove all theme classes
+      document.body.classList.remove('theme-aurora', 'theme-cosmos', 'theme-mystical', 'theme-emerald', 'theme-sunset');
+
+      // Remove active from all buttons
+      themeButtons.forEach(b => b.classList.remove('active'));
+
+      // Add theme class and active button
+      if (theme !== 'default') {
+        document.body.classList.add(`theme-${theme}`);
+      }
+      btn.classList.add('active');
+
+      // Save to localStorage
+      localStorage.setItem('oda-theme', theme);
+    });
+  });
 </script>
 </body>
 </html>
