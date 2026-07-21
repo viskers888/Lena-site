@@ -71,6 +71,28 @@
   #scene { z-index: 1; }
   #flies { z-index: 2; }
 
+  /* кино-виньетка поверх всего — «плёночный» кадр */
+  .vignette {
+    position: fixed; inset: 0; z-index: 41; pointer-events: none;
+    background:
+      radial-gradient(ellipse 78% 78% at 50% 46%, transparent 55%, rgba(6,2,16,0.55) 100%),
+      linear-gradient(to bottom, rgba(8,3,20,0.35), transparent 18%, transparent 82%, rgba(8,3,20,0.45));
+  }
+
+  /* заставка из бабочек */
+  #intro { position: fixed; inset: 0; z-index: 55; pointer-events: none; }
+  .intro-hint {
+    position: fixed; z-index: 56; left: 50%; bottom: 12%;
+    transform: translateX(-50%);
+    font-size: 0.72rem; letter-spacing: 0.4em; text-transform: uppercase;
+    color: rgba(255,225,160,0.9);
+    text-shadow: 0 2px 20px rgba(0,0,0,0.6);
+    white-space: nowrap; pointer-events: none;
+    animation: hintPulse 2.6s ease-in-out infinite;
+    transition: opacity 0.6s;
+  }
+  body.revealed .intro-hint { opacity: 0; }
+
   .grain {
     position: fixed; inset: -50%;
     width: 200%; height: 200%;
@@ -471,7 +493,10 @@
 <div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 <div class="warm-veil"></div>
 <canvas id="scene"></canvas>
+<div class="vignette"></div>
 <canvas id="flies"></canvas>
+<canvas id="intro"></canvas>
+<div class="intro-hint" id="introHint">✦ двигай мышкой ✦</div>
 <div class="grain"></div>
 <div class="cursor-ring" id="curRing"></div>
 <div class="cursor-dot" id="curDot"></div>
@@ -1004,7 +1029,7 @@ const states = [];
 /* 0: КРИСТАЛЛ (Таро) */
 {
   const g = new THREE.Group();
-  const mat = new THREE.MeshPhysicalMaterial({ color: 0x9fd8f5, metalness: 0.45, roughness: 0.08, emissive: 0x1e6a9a, emissiveIntensity: 0.8, flatShading: true, transparent: true, opacity: 0.96 });
+  const mat = new THREE.MeshPhysicalMaterial({ color: 0xffd27a, metalness: 0.55, roughness: 0.12, emissive: 0x8a4e0e, emissiveIntensity: 0.7, flatShading: true, transparent: true, opacity: 0.96 });
   const main = new THREE.Mesh(new THREE.OctahedronGeometry(0.8), mat); g.add(main);
   for (let i = 0; i < 4; i++) {
     const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.14 + Math.random() * 0.1), mat.clone());
@@ -1012,7 +1037,7 @@ const states = [];
     s.position.set(Math.cos(a) * 1.2, Math.sin(a * 1.7) * 0.5, Math.sin(a) * 1.2);
     g.add(s);
   }
-  const lt = new THREE.PointLight(0x59c8f5, 1.6, 6); g.add(lt);
+  const lt = new THREE.PointLight(0xffb43a, 1.6, 6); g.add(lt);
   states.push({ group: g, update: (t) => {
     g.rotation.y = t * 0.55;
     g.children[0].rotation.x = t * 0.35;
@@ -1408,6 +1433,170 @@ function fliesLoop() {
   }
 }
 fliesLoop();
+
+/* ============ ЗАСТАВКА: ЭКРАН В БАБОЧКАХ → РАЗЛЁТ ============ */
+function wingPathG(g, S) {
+  g.beginPath();
+  g.ellipse(WING_UP.cx * S, WING_UP.cy * S, WING_UP.rx * S, WING_UP.ry * S, WING_UP.rot, 0, Math.PI * 2);
+  g.ellipse(WING_LO.cx * S, WING_LO.cy * S, WING_LO.rx * S, WING_LO.ry * S, WING_LO.rot, 0, Math.PI * 2);
+}
+/* пре-рендер спрайта бабочки (золотые волокна) для быстрой отрисовки сотен копий */
+function makeButterflySprite(flap) {
+  const SP = 160, S = 34;
+  const c = document.createElement('canvas'); c.width = c.height = SP;
+  const g = c.getContext('2d');
+  g.translate(SP / 2, SP / 2 + 4);
+  for (const dir of [-1, 1]) {
+    g.save();
+    g.scale(dir * flap, 1);
+    g.shadowColor = 'rgba(255,190,90,0.95)'; g.shadowBlur = 9;
+    const grd = g.createRadialGradient(S * 0.2, 0, S * 0.05, S * 0.6, 0, S * 1.1);
+    grd.addColorStop(0, 'rgba(255,214,140,0.22)');
+    grd.addColorStop(0.7, 'rgba(255,175,85,0.09)');
+    grd.addColorStop(1, 'rgba(255,150,60,0)');
+    g.fillStyle = grd; wingPathG(g, S); g.fill();
+    g.strokeStyle = 'rgba(255,205,115,0.6)'; g.lineWidth = 0.6;
+    for (let v = 0; v <= 7; v++) {
+      const k = v / 7;
+      const tx = lerp(WING_UP.cx + WING_UP.rx * 0.8, WING_LO.cx + WING_LO.rx * 0.2, k) * S;
+      const ty = lerp(WING_UP.cy - WING_UP.ry * 0.7, WING_LO.cy + WING_LO.ry * 0.9, k) * S;
+      g.beginPath(); g.moveTo(S * 0.05, 0); g.quadraticCurveTo(tx * 0.55, ty * 0.5, tx, ty); g.stroke();
+    }
+    g.strokeStyle = 'rgba(255,215,140,0.35)'; g.lineWidth = 0.4;
+    for (let a = 1; a <= 3; a++) {
+      const rr = a / 3;
+      g.beginPath(); g.ellipse(WING_UP.cx * S * rr, WING_UP.cy * S * rr * 0.8, WING_UP.rx * S * rr, WING_UP.ry * S * rr, WING_UP.rot, -0.4, Math.PI + 0.2); g.stroke();
+    }
+    g.strokeStyle = 'rgba(255,228,155,0.9)'; g.lineWidth = 1; wingPathG(g, S); g.stroke();
+    /* искры */
+    for (let d = 0; d < 12; d++) {
+      const x = Math.random() * 1.2, y = -0.5 + Math.random();
+      if (inEllipse(x, y, WING_UP) || inEllipse(x, y, WING_LO)) {
+        g.fillStyle = Math.random() < 0.8 ? 'rgba(255,220,150,0.9)' : 'rgba(180,230,245,0.85)';
+        g.beginPath(); g.arc(x * S, y * S, Math.random() * 1.2 + 0.5, 0, Math.PI * 2); g.fill();
+      }
+    }
+    g.restore();
+  }
+  g.shadowColor = 'rgba(255,190,90,0.9)'; g.shadowBlur = 7;
+  const bg = g.createLinearGradient(0, -S * 0.4, 0, S * 0.4);
+  bg.addColorStop(0, 'rgba(255,238,190,1)'); bg.addColorStop(1, 'rgba(210,145,55,1)');
+  g.fillStyle = bg; g.beginPath(); g.ellipse(0, 0, S * 0.05, S * 0.4, 0, 0, Math.PI * 2); g.fill();
+  g.strokeStyle = 'rgba(255,212,125,0.85)'; g.lineWidth = 0.7;
+  for (const d of [-1, 1]) { g.beginPath(); g.moveTo(0, -S * 0.36); g.quadraticCurveTo(d * S * 0.22, -S * 0.66, d * S * 0.34, -S * 0.58); g.stroke(); }
+  return c;
+}
+const introCanvas = document.getElementById('intro');
+const introHint = document.getElementById('introHint');
+const ictx = introCanvas.getContext('2d');
+const FRAMES = [0.35, 0.55, 0.78, 1.0, 0.78, 0.55].map(makeButterflySprite);
+const SPRITE = 160;
+
+let iw = 0, ih = 0, idpr = 1, swarm = [], introActive = true, introStart = performance.now();
+let icx = -999, icy = -999, disperse = false, disperseAt = 0;
+
+function buildSwarm() {
+  idpr = Math.min(devicePixelRatio, 2);
+  iw = innerWidth; ih = innerHeight;
+  introCanvas.width = iw * idpr; introCanvas.height = ih * idpr;
+  introCanvas.style.width = iw + 'px'; introCanvas.style.height = ih + 'px';
+  ictx.setTransform(idpr, 0, 0, idpr, 0, 0);
+  swarm = [];
+  const gap = iw < 700 ? 82 : 96;              /* плотность стены */
+  for (let gy = -0.3; gy < ih + gap; gy += gap) {
+    for (let gx = -0.3; gx < iw + gap; gx += gap) {
+      const jx = (Math.random() - 0.5) * gap * 0.7, jy = (Math.random() - 0.5) * gap * 0.7;
+      swarm.push({
+        x: gx + jx, y: gy + jy, hx: gx + jx, hy: gy + jy,
+        vx: 0, vy: 0,
+        sc: 0.5 + Math.random() * 0.6,
+        rot: (Math.random() - 0.5) * 0.6, vr: 0,
+        ph: Math.random() * 6.28, alpha: 1,
+        flying: false, delay: 0,
+      });
+    }
+  }
+}
+buildSwarm();
+addEventListener('resize', () => { if (introActive) buildSwarm(); });
+
+function triggerDisperse() {
+  if (disperse || !introActive) return;
+  disperse = true; disperseAt = performance.now();
+  document.body.classList.add('revealed');
+  for (const b of swarm) {
+    const dx = b.x - icx, dy = b.y - icy, dist = Math.hypot(dx, dy);
+    b.delay = Math.min(520, dist * 0.4) + Math.random() * 180;   /* волна от курсора */
+  }
+}
+/* запуск разлёта: движение мыши, тач, скролл или таймаут */
+addEventListener('pointermove', (e) => {
+  icx = e.clientX; icy = e.clientY;
+  if (introActive && !disperse && performance.now() - introStart > 350) triggerDisperse();
+}, { passive: true });
+addEventListener('touchstart', (e) => { if (e.touches[0]) { icx = e.touches[0].clientX; icy = e.touches[0].clientY; } triggerDisperse(); }, { passive: true });
+addEventListener('wheel', triggerDisperse, { passive: true });
+setTimeout(() => triggerDisperse(), 6500);
+if (reduceMotion) { introActive = false; introCanvas.style.display = 'none'; introHint.style.display = 'none'; document.body.classList.add('revealed'); }
+
+function introLoop() {
+  if (!introActive) return;
+  requestAnimationFrame(introLoop);
+  const now = performance.now(), t = now / 1000;
+  ictx.clearRect(0, 0, iw, ih);
+  let alive = 0;
+  for (const b of swarm) {
+    const flap = 0.5 + 0.5 * Math.sin(t * 9 + b.ph);
+    if (!disperse) {
+      /* «стена»: лёгкое дыхание + отскок от курсора */
+      b.x = b.hx + Math.sin(t * 1.4 + b.ph) * 3;
+      b.y = b.hy + Math.cos(t * 1.1 + b.ph) * 3;
+      const dx = b.x - icx, dy = b.y - icy, d2 = dx * dx + dy * dy;
+      if (d2 < 140 * 140 && d2 > 1) { const d = Math.sqrt(d2); b.x += dx / d * (140 - d) * 0.15; b.y += dy / d * (140 - d) * 0.15; }
+    } else {
+      if (b.delay > 0) {
+        b.delay -= now - (b._lt || now);
+        b.x = b.hx + Math.sin(t * 1.4 + b.ph) * 3;
+        b.y = b.hy + Math.cos(t * 1.1 + b.ph) * 3;
+      } else {
+        if (!b.flying) {
+          b.flying = true;
+          const dx = b.x - icx, dy = b.y - icy, d = Math.hypot(dx, dy) || 1;
+          const spd = 8 + Math.random() * 12;
+          b.vx = dx / d * spd + (Math.random() - 0.5) * 5;
+          b.vy = dy / d * spd - 5 - Math.random() * 7;   /* вверх */
+          b.vr = (Math.random() - 0.5) * 0.4;
+        }
+        b.vy -= 0.12;                    /* подъём-порхание вверх */
+        b.vx += Math.sin(t * 3 + b.ph) * 0.3;
+        b.vx *= 0.996; b.vy *= 0.994;
+        b.x += b.vx; b.y += b.vy;
+        b.rot += b.vr;
+        b.alpha -= 0.022;
+      }
+    }
+    b._lt = now;
+    if (b.alpha <= 0.01) continue;
+    const onScreen = b.x > -120 && b.x < iw + 120 && b.y > -160 && b.y < ih + 120;
+    if (!onScreen && b.flying) { b.alpha = 0; continue; }
+    alive++;
+    const frame = FRAMES[Math.floor(flap * (FRAMES.length - 1))];
+    const size = SPRITE * b.sc;
+    ictx.save();
+    ictx.globalAlpha = Math.max(0, b.alpha);
+    ictx.translate(b.x, b.y);
+    if (b.flying) ictx.rotate(b.rot + Math.atan2(b.vy, b.vx) + Math.PI / 2);
+    else ictx.rotate(b.rot);
+    ictx.drawImage(frame, -size / 2, -size / 2, size, size);
+    ictx.restore();
+  }
+  if (disperse && alive === 0) {
+    introActive = false;
+    introCanvas.style.display = 'none';
+    introHint.style.display = 'none';
+  }
+}
+introLoop();
 
 /* ============ ПОЯВЛЕНИЕ СЕКЦИЙ ============ */
 const io = new IntersectionObserver((es) => {
