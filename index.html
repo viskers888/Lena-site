@@ -12,9 +12,9 @@
   :root {
     --gold: #d4af5e;
     --gold-light: #efd598;
-    --violet: #a78bfa;
+    --cyan: #6cc7f0;
     /* динамические — управляются скроллом */
-    --bg: #0b0820;
+    --bg: #04070f;
     --ink: #efeaf7;
     --ink-muted: rgba(239,234,247,0.55);
     --panel: rgba(255,255,255,0.04);
@@ -43,9 +43,9 @@
     opacity: var(--blobO, 0.55);
     will-change: transform;
   }
-  .blob.b1 { top: -18vmax; left: -12vmax; background: radial-gradient(circle, var(--blob1, #3b2a6e), transparent 65%); animation: drift1 46s ease-in-out infinite alternate; }
-  .blob.b2 { bottom: -22vmax; right: -14vmax; background: radial-gradient(circle, var(--blob2, #6e4a2a), transparent 65%); animation: drift2 38s ease-in-out infinite alternate; }
-  .blob.b3 { top: 30vh; left: 55vw; width: 34vmax; height: 34vmax; background: radial-gradient(circle, var(--blob3, #2a4a6e), transparent 65%); opacity: calc(var(--blobO, 0.55) * 0.55); animation: drift1 52s ease-in-out infinite alternate-reverse; }
+  .blob.b1 { top: -18vmax; left: -12vmax; background: radial-gradient(circle, var(--blob1, #122a52), transparent 65%); animation: drift1 46s ease-in-out infinite alternate; }
+  .blob.b2 { bottom: -22vmax; right: -14vmax; background: radial-gradient(circle, var(--blob2, #0d3648), transparent 65%); animation: drift2 38s ease-in-out infinite alternate; }
+  .blob.b3 { top: 30vh; left: 55vw; width: 34vmax; height: 34vmax; background: radial-gradient(circle, var(--blob3, #24184a), transparent 65%); opacity: calc(var(--blobO, 0.55) * 0.55); animation: drift1 52s ease-in-out infinite alternate-reverse; }
   @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(9vmax, 6vmax) scale(1.15); } }
   @keyframes drift2 { from { transform: translate(0,0) scale(1.1); } to { transform: translate(-8vmax, -5vmax) scale(0.95); } }
 
@@ -211,7 +211,7 @@
 
   .hero-title .ch {
     display: inline-block;
-    background: linear-gradient(115deg, #f3ead2 10%, var(--gold-light) 38%, #cbb4f5 72%, #f3ead2 95%);
+    background: linear-gradient(115deg, #f3ead2 10%, var(--gold-light) 38%, #a8d8f5 72%, #f3ead2 95%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -281,7 +281,7 @@
 
   .glass {
     background: linear-gradient(var(--panel), var(--panel)) padding-box,
-                linear-gradient(150deg, rgba(212,175,94,0.5), rgba(255,255,255,0.06) 40%, rgba(167,139,250,0.3)) border-box;
+                linear-gradient(150deg, rgba(212,175,94,0.5), rgba(255,255,255,0.06) 40%, rgba(108,199,240,0.3)) border-box;
     border: 1px solid transparent;
     border-radius: 26px;
     backdrop-filter: blur(16px);
@@ -616,17 +616,17 @@ const rgb = (c) => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
 const mix = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
 
 const bgStops = [
-  [0,    [11, 8, 32]],     // глубокий индиго
-  [0.35, [52, 34, 74]],    // сливовый
-  [0.65, [176, 138, 128]], // пыльная роза / рассвет
-  [1,    [243, 237, 226]], // тёплый молочный
+  [0,    [4, 7, 15]],      // глубокий сине-чёрный космос
+  [0.4,  [11, 22, 48]],    // тёмный сапфир
+  [0.7,  [168, 104, 38]],  // туманность разгорается янтарным
+  [1,    [248, 235, 208]], // тёплое золотое свечение
 ];
 const blobStops = {
-  b1: [[0, [59, 42, 110]], [0.5, [122, 74, 120]], [1, [232, 200, 160]]],
-  b2: [[0, [110, 74, 42]], [0.5, [160, 96, 88]],  [1, [214, 178, 138]]],
-  b3: [[0, [42, 74, 110]], [0.5, [110, 84, 140]], [1, [226, 194, 208]]],
+  b1: [[0, [18, 42, 82]],  [0.55, [215, 130, 45]], [1, [246, 198, 116]]],
+  b2: [[0, [13, 54, 72]],  [0.55, [235, 150, 50]], [1, [238, 172, 80]]],
+  b3: [[0, [36, 24, 74]],  [0.55, [170, 95, 105]], [1, [250, 220, 156]]],
 };
-const darkInk = [239, 234, 247], lightInk = [43, 36, 58];
+const darkInk = [232, 240, 250], lightInk = [58, 42, 24];
 
 function stopMix(stops, t) {
   for (let i = 1; i < stops.length; i++) {
@@ -648,13 +648,13 @@ function updateScroll() {
   r.setProperty('--blob1', rgb(stopMix(blobStops.b1, t)));
   r.setProperty('--blob2', rgb(stopMix(blobStops.b2, t)));
   r.setProperty('--blob3', rgb(stopMix(blobStops.b3, t)));
-  const inkT = Math.min(1, Math.max(0, (t - 0.3) / 0.45));
+  const inkT = Math.min(1, Math.max(0, (t - 0.52) / 0.3));
   const ink = mix(darkInk, lightInk, inkT);
   r.setProperty('--ink', rgb(ink));
   r.setProperty('--ink-muted', `rgba(${ink[0]|0},${ink[1]|0},${ink[2]|0},0.62)`);
-  r.setProperty('--panel', t > 0.5 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.04)');
-  r.setProperty('--panel-border', t > 0.5 ? 'rgba(43,36,58,0.14)' : 'rgba(255,255,255,0.09)');
-  r.setProperty('--blobO', String(lerp(0.55, 0.28, t)));
+  r.setProperty('--panel', t > 0.58 ? 'rgba(255,252,244,0.55)' : 'rgba(255,255,255,0.05)');
+  r.setProperty('--panel-border', t > 0.58 ? 'rgba(58,42,24,0.14)' : 'rgba(255,255,255,0.1)');
+  r.setProperty('--blobO', String(lerp(0.55, 0.4, t)));
 }
 addEventListener('scroll', updateScroll, { passive: true });
 updateScroll();
@@ -693,12 +693,12 @@ camera.position.set(0, 0, 9);
 
 scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 const key = new THREE.DirectionalLight(0xffe9bd, 1.5); key.position.set(4, 5, 6); scene.add(key);
-const rim = new THREE.DirectionalLight(0x8a6cff, 1.0); rim.position.set(-5, -2, -4); scene.add(rim);
+const rim = new THREE.DirectionalLight(0x4fa8e0, 1.1); rim.position.set(-5, -2, -4); scene.add(rim);
 
 const planet = new THREE.Group();
 scene.add(planet);
 
-/* --- шейдер «жидкой» переливающейся оболочки --- */
+/* --- цифровой глобус: тёмная сфера + точки-континенты + дуги данных --- */
 const noiseGLSL = `
 vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
 vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
@@ -725,58 +725,134 @@ float snoise(vec3 v){
   return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
 }`;
 
+const R = 2.15;
 const orbUniforms = {
   uTime: { value: 0 },
   uFade: { value: 1 },       // приглушение на светлом фоне
 };
+/* тёмное полупрозрачное тело планеты с неоновым ободом */
 const orb = new THREE.Mesh(
-  new THREE.SphereGeometry(2.15, 160, 160),
+  new THREE.SphereGeometry(R, 96, 96),
   new THREE.ShaderMaterial({
     transparent: true,
     depthWrite: false,
     uniforms: orbUniforms,
-    vertexShader: noiseGLSL + `
-      uniform float uTime;
-      varying vec3 vN; varying vec3 vPos; varying float vD;
+    vertexShader: `
+      varying vec3 vN; varying vec3 vPos;
       void main() {
-        float d = snoise(normal * 1.6 + uTime * 0.16) * 0.09
-                + snoise(normal * 4.2 - uTime * 0.1) * 0.03;
-        vec3 p = position + normal * d;
-        vD = d;
         vN = normalize(normalMatrix * normal);
-        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
         vPos = mv.xyz;
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: `
-      uniform float uTime; uniform float uFade;
-      varying vec3 vN; varying vec3 vPos; varying float vD;
+      uniform float uFade;
+      varying vec3 vN; varying vec3 vPos;
       void main() {
         vec3 V = normalize(-vPos);
-        float F = pow(1.0 - abs(dot(vN, V)), 2.0);
-        /* переливы: глубокий фиолет -> магента -> золото по френелю и рельефу */
-        vec3 deep   = vec3(0.16, 0.09, 0.34);
-        vec3 plum   = vec3(0.45, 0.20, 0.52);
-        vec3 goldC  = vec3(0.92, 0.75, 0.42);
-        vec3 lilac  = vec3(0.66, 0.55, 0.98);
-        vec3 col = mix(deep, plum, smoothstep(-0.09, 0.12, vD));
-        col = mix(col, lilac, F * 0.65);
-        col = mix(col, goldC, pow(F, 2.6));
-        float a = (0.16 + F * 0.72) * uFade;
+        float F = pow(1.0 - abs(dot(vN, V)), 1.9);
+        vec3 deep = vec3(0.012, 0.05, 0.12);   /* глубокая ночная синева */
+        vec3 teal = vec3(0.10, 0.45, 0.68);
+        vec3 cyan = vec3(0.35, 0.82, 1.0);     /* неоновый край */
+        vec3 col = mix(deep, teal, F * 0.8);
+        col = mix(col, cyan, pow(F, 3.0));
+        float a = (0.30 + F * 0.62) * uFade;
         gl_FragColor = vec4(col, a);
       }`
   })
 );
 planet.add(orb);
 
-/* мягкий ореол-атмосфера */
+/* точки-«континенты» на поверхности: кластеры как огни городов */
+function surfMask(x, y, z) {
+  return Math.sin(x * 2.9 + 0.4) * Math.sin(y * 3.6 + 1.3) * Math.sin(z * 2.2 + 2.7)
+       + 0.45 * Math.sin(x * 6.1 + y * 4.7 + z * 5.3);
+}
+function makeSurfPoints(count, threshold, color, size, opacity) {
+  const pos = [];
+  let guard = 0;
+  while (pos.length < count * 3 && guard++ < count * 60) {
+    const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    const x = Math.sin(ph) * Math.cos(th), y = Math.cos(ph), z = Math.sin(ph) * Math.sin(th);
+    if (surfMask(x, y, z) > threshold) pos.push(x * R * 1.01, y * R * 1.01, z * R * 1.01);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
+  return new THREE.Points(geo, new THREE.PointsMaterial({ color, size, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
+}
+const cityPts  = makeSurfPoints(2200, 0.18, 0x59c8f5, 0.026, 0.85);
+const hotPts   = makeSurfPoints(160, 0.55, 0xf0c46a, 0.055, 0.95);
+planet.add(cityPts, hotPts);
+
+/* тонкая сетка меридианов и параллелей */
+const grid = new THREE.Group();
+{
+  const gmat = new THREE.LineBasicMaterial({ color: 0x3a9cd0, transparent: true, opacity: 0.10 });
+  for (let i = 1; i < 6; i++) {
+    const lat = -Math.PI / 2 + Math.PI * i / 6;
+    const r = Math.cos(lat) * R, ypos = Math.sin(lat) * R;
+    const pts = [];
+    for (let a = 0; a <= 64; a++) pts.push(new THREE.Vector3(Math.cos(a / 64 * Math.PI * 2) * r, ypos, Math.sin(a / 64 * Math.PI * 2) * r));
+    grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gmat));
+  }
+  for (let i = 0; i < 8; i++) {
+    const a0 = i / 8 * Math.PI * 2;
+    const pts = [];
+    for (let a = 0; a <= 64; a++) {
+      const ph = a / 64 * Math.PI * 2;
+      pts.push(new THREE.Vector3(Math.cos(a0) * Math.sin(ph) * R, Math.cos(ph) * R, Math.sin(a0) * Math.sin(ph) * R));
+    }
+    grid.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gmat));
+  }
+}
+planet.add(grid);
+
+/* дуги данных между точками поверхности + бегущие импульсы */
+const arcCurves = [];
+const arcs = new THREE.Group();
+{
+  const colA = 0xf0c46a, colB = 0x59c8f5;
+  for (let i = 0; i < 14; i++) {
+    const rndDir = () => {
+      const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+      return new THREE.Vector3(Math.sin(ph) * Math.cos(th), Math.cos(ph), Math.sin(ph) * Math.sin(th));
+    };
+    const A = rndDir().multiplyScalar(R), B = rndDir().multiplyScalar(R);
+    if (A.distanceTo(B) < 1.4) { i--; continue; }
+    const mid = A.clone().add(B).normalize().multiplyScalar(R * (1.25 + Math.random() * 0.45));
+    const curve = new THREE.QuadraticBezierCurve3(A, mid, B);
+    arcCurves.push(curve);
+    const line = new THREE.Line(
+      new THREE.BufferGeometry().setFromPoints(curve.getPoints(48)),
+      new THREE.LineBasicMaterial({ color: i % 3 ? colB : colA, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending })
+    );
+    arcs.add(line);
+  }
+}
+planet.add(arcs);
+
+const pulseGeo = new THREE.BufferGeometry();
+pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arcCurves.length * 3), 3));
+const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({ color: 0xffe6a8, size: 0.09, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+planet.add(pulses);
+const _pv = new THREE.Vector3();
+function globeTick(t) {
+  const p = pulseGeo.attributes.position.array;
+  for (let i = 0; i < arcCurves.length; i++) {
+    arcCurves[i].getPoint((t * 0.22 + i / arcCurves.length) % 1, _pv);
+    p[i*3] = _pv.x; p[i*3+1] = _pv.y; p[i*3+2] = _pv.z;
+  }
+  pulseGeo.attributes.position.needsUpdate = true;
+}
+
+/* атмосферное свечение */
 const halo = new THREE.Mesh(
-  new THREE.SphereGeometry(2.6, 48, 48),
+  new THREE.SphereGeometry(R * 1.24, 48, 48),
   new THREE.ShaderMaterial({
     transparent: true, side: THREE.BackSide, depthWrite: false,
     uniforms: { uFade: { value: 1 } },
     vertexShader: `varying float vI; void main(){ vec3 n = normalize(normalMatrix * normal); vec3 v = normalize((modelViewMatrix * vec4(position,1.)).xyz); vI = pow(1.0 - abs(dot(n, -v)), 3.2); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
-    fragmentShader: `uniform float uFade; varying float vI; void main(){ vec3 c = mix(vec3(0.83,0.69,0.37), vec3(0.62,0.5,0.95), 0.35); gl_FragColor = vec4(c, vI * 0.4 * uFade); }`
+    fragmentShader: `uniform float uFade; varying float vI; void main(){ vec3 c = mix(vec3(0.30,0.72,0.98), vec3(0.94,0.77,0.42), 0.18); gl_FragColor = vec4(c, vI * 0.5 * uFade); }`
   })
 );
 planet.add(halo);
@@ -784,18 +860,17 @@ planet.add(halo);
 /* кольцо из частиц вокруг сферы */
 const ringGeo = new THREE.BufferGeometry();
 {
-  const N = 900, pos = new Float32Array(N * 3), sz = new Float32Array(N);
+  const N = 900, pos = new Float32Array(N * 3);
   for (let i = 0; i < N; i++) {
     const a = Math.random() * Math.PI * 2;
     const r = 2.9 + Math.random() * 1.15 + (Math.random() < 0.2 ? Math.random() * 0.6 : 0);
     pos[i*3] = Math.cos(a) * r;
     pos[i*3+1] = (Math.random() - 0.5) * 0.16;
     pos[i*3+2] = Math.sin(a) * r;
-    sz[i] = Math.random();
   }
   ringGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
 }
-const ring = new THREE.Points(ringGeo, new THREE.PointsMaterial({ color: 0xd4af5e, size: 0.028, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false }));
+const ring = new THREE.Points(ringGeo, new THREE.PointsMaterial({ color: 0x8fd4f0, size: 0.026, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }));
 ring.rotation.x = 1.05; ring.rotation.z = -0.22;
 planet.add(ring);
 
@@ -807,7 +882,7 @@ const states = [];
 /* 0: КРИСТАЛЛ (Таро) */
 {
   const g = new THREE.Group();
-  const mat = new THREE.MeshPhysicalMaterial({ color: 0xb08cff, metalness: 0.45, roughness: 0.08, emissive: 0x5b34b8, emissiveIntensity: 0.75, flatShading: true, transparent: true, opacity: 0.96 });
+  const mat = new THREE.MeshPhysicalMaterial({ color: 0x9fd8f5, metalness: 0.45, roughness: 0.08, emissive: 0x1e6a9a, emissiveIntensity: 0.8, flatShading: true, transparent: true, opacity: 0.96 });
   const main = new THREE.Mesh(new THREE.OctahedronGeometry(0.8), mat); g.add(main);
   for (let i = 0; i < 4; i++) {
     const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.14 + Math.random() * 0.1), mat.clone());
@@ -815,7 +890,7 @@ const states = [];
     s.position.set(Math.cos(a) * 1.2, Math.sin(a * 1.7) * 0.5, Math.sin(a) * 1.2);
     g.add(s);
   }
-  const lt = new THREE.PointLight(0x9b6cff, 1.6, 6); g.add(lt);
+  const lt = new THREE.PointLight(0x59c8f5, 1.6, 6); g.add(lt);
   states.push({ group: g, update: (t) => {
     g.rotation.y = t * 0.55;
     g.children[0].rotation.x = t * 0.35;
@@ -860,7 +935,7 @@ const states = [];
   const wc = document.createElement('canvas'); wc.width = wc.height = 256;
   const wctx = wc.getContext('2d');
   const grad = wctx.createRadialGradient(60, 130, 10, 128, 128, 150);
-  grad.addColorStop(0, '#e8d8ff'); grad.addColorStop(0.45, '#a78bfa'); grad.addColorStop(0.8, '#5b7cf0'); grad.addColorStop(1, '#2a3a8f');
+  grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.45, '#e8f0fa'); grad.addColorStop(0.8, '#b8d4ee'); grad.addColorStop(1, '#7fa8d0');
   wctx.fillStyle = grad; wctx.fillRect(0, 0, 256, 256);
   const wtex = new THREE.CanvasTexture(wc);
 
@@ -877,7 +952,7 @@ const states = [];
   for (let i = 0; i < uv.count; i++) {
     uv.setXY(i, (vp.getX(i) - bb.min.x) / (bb.max.x - bb.min.x), (vp.getY(i) - bb.min.y) / (bb.max.y - bb.min.y));
   }
-  const wingMat = new THREE.MeshPhysicalMaterial({ map: wtex, emissive: 0x6a5acd, emissiveIntensity: 0.4, emissiveMap: wtex, side: THREE.DoubleSide, transparent: true, opacity: 0.95, metalness: 0.15, roughness: 0.35 });
+  const wingMat = new THREE.MeshPhysicalMaterial({ map: wtex, emissive: 0xa8c8e8, emissiveIntensity: 0.35, emissiveMap: wtex, side: THREE.DoubleSide, transparent: true, opacity: 0.92, metalness: 0.05, roughness: 0.45 });
   const wL = new THREE.Mesh(wingGeo, wingMat);
   const wR = new THREE.Mesh(wingGeo, wingMat.clone()); wR.scale.x = -1;
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.75, 4, 10), new THREE.MeshPhysicalMaterial({ color: 0x241d3a, roughness: 0.4, metalness: 0.3 }));
@@ -936,7 +1011,7 @@ function makeDust(count, color, size, spread) {
   return new THREE.Points(geo, new THREE.PointsMaterial({ color, size, transparent: true, opacity: 0.65, depthWrite: false }));
 }
 const dust1 = makeDust(420, 0xd4af5e, 0.03, 13);
-const dust2 = makeDust(260, 0xa78bfa, 0.024, 16);
+const dust2 = makeDust(260, 0x6cb8e8, 0.024, 16);
 scene.add(dust1, dust2);
 
 /* ---- переключение состояний ---- */
@@ -1002,6 +1077,7 @@ function loop() {
   const t = clock.getElapsedTime();
   orbUniforms.uTime.value = t;
 
+  globeTick(t);
   if (!switching && !reduceMotion) planet.rotation.y += 0.0016;
   planet.rotation.x = lerp(planet.rotation.x, mouseY * 0.16, 0.04);
   planet.rotation.z = lerp(planet.rotation.z, -mouseX * 0.09, 0.04);
@@ -1014,8 +1090,13 @@ function loop() {
   const fade = lerp(1, 0.55, scrollP);
   orbUniforms.uFade.value = fade;
   halo.material.uniforms.uFade.value = fade;
-  ring.material.opacity = lerp(0.75, 0.3, scrollP);
+  ring.material.opacity = lerp(0.6, 0.25, scrollP);
   ring.rotation.y = t * 0.05;
+  cityPts.material.opacity = lerp(0.85, 0.4, scrollP);
+  hotPts.material.opacity = lerp(0.95, 0.5, scrollP);
+  arcs.children.forEach(l => l.material.opacity = lerp(0.28, 0.12, scrollP));
+  pulses.material.opacity = lerp(0.95, 0.4, scrollP);
+  grid.children.forEach(l => l.material.opacity = lerp(0.10, 0.04, scrollP));
   dust1.material.opacity = lerp(0.65, 0.12, scrollP);
   dust2.material.opacity = lerp(0.5, 0.08, scrollP);
   dust1.rotation.y = t * 0.008;
@@ -1040,8 +1121,8 @@ function fresize() { fw = fc.width = innerWidth; fh = fc.height = innerHeight; }
 addEventListener('resize', fresize); fresize();
 
 const PALETTE = [
-  ['#cbb4f5', '#8a6cff'], ['#efd598', '#d4af5e'],
-  ['#a7d8f5', '#5b8cd0'], ['#f5c4d8', '#d07ba0'],
+  ['#ffffff', '#dfe9ff'], ['#fffdf4', '#f4e8c8'],
+  ['#f4f9ff', '#cfe0f2'], ['#ffffff', '#e8ddf2'],
 ];
 const flies = [];
 const FN = innerWidth > 768 ? 20 : 11;
@@ -1060,34 +1141,69 @@ addEventListener('pointermove', (e) => { mx2 = e.clientX; my2 = e.clientY; });
 
 function drawFly(f, t) {
   const flap = Math.sin(t * 8 + f.ph) * 0.75;
-  const alpha = f.depth * lerp(0.9, 0, Math.min(1, scrollP * 3.2));
+  const alpha = f.depth * lerp(0.88, 0, Math.min(1, scrollP * 3.2));
   if (alpha <= 0.01) return;
   fx.save();
   fx.translate(f.x, f.y);
   fx.rotate(Math.atan2(f.vy, f.vx) + Math.PI / 2);
   fx.scale(f.depth, f.depth);
   fx.globalAlpha = alpha;
-  fx.shadowColor = f.c2; fx.shadowBlur = 12 * f.depth;
-  const g1 = fx.createLinearGradient(0, -f.s, f.s * 1.3, f.s);
-  g1.addColorStop(0, f.c1); g1.addColorStop(1, f.c2);
-  fx.fillStyle = g1;
+  /* мягкое свечение — на тёмном фоне крылья слегка «светятся» */
+  fx.shadowColor = 'rgba(200,224,255,0.9)';
+  fx.shadowBlur = 14 * f.depth;
   for (const dir of [-1, 1]) {
     fx.save();
     fx.scale(dir * (0.35 + Math.abs(flap) * 0.65), 1);
+    /* верхнее крыло — полупрозрачное, белое, с градиентом к краю */
+    const g1 = fx.createRadialGradient(f.s * 0.15, -f.s * 0.05, f.s * 0.05, f.s * 0.6, -f.s * 0.16, f.s * 1.05);
+    g1.addColorStop(0, f.c1); g1.addColorStop(0.75, f.c2); g1.addColorStop(1, 'rgba(255,255,255,0.25)');
+    fx.fillStyle = g1;
+    fx.globalAlpha = alpha * 0.85;
     fx.beginPath();
     fx.ellipse(f.s * 0.58, -f.s * 0.16, f.s * 0.58, f.s * 0.4, -0.42, 0, Math.PI * 2);
     fx.fill();
+    /* нижнее крыло */
+    fx.globalAlpha = alpha * 0.7;
     fx.beginPath();
     fx.ellipse(f.s * 0.4, f.s * 0.32, f.s * 0.4, f.s * 0.27, 0.5, 0, Math.PI * 2);
     fx.fill();
+    /* прожилки — тонкие линии от основания к краю крыла */
+    fx.shadowBlur = 0;
+    fx.globalAlpha = alpha * 0.5;
+    fx.strokeStyle = 'rgba(150,170,200,0.55)';
+    fx.lineWidth = 0.55;
+    for (let v = 0; v < 4; v++) {
+      const ang = -0.85 + v * 0.34;
+      fx.beginPath();
+      fx.moveTo(f.s * 0.06, -f.s * 0.02);
+      fx.quadraticCurveTo(
+        f.s * 0.55 * Math.cos(ang), f.s * 0.55 * Math.sin(ang) - f.s * 0.12,
+        f.s * 1.05 * Math.cos(ang * 0.8), f.s * 0.85 * Math.sin(ang * 0.8) - f.s * 0.16
+      );
+      fx.stroke();
+    }
+    /* контур верхнего крыла */
+    fx.globalAlpha = alpha * 0.35;
+    fx.beginPath();
+    fx.ellipse(f.s * 0.58, -f.s * 0.16, f.s * 0.58, f.s * 0.4, -0.42, 0, Math.PI * 2);
+    fx.stroke();
     fx.restore();
   }
-  /* тельце */
+  /* тельце и усики */
   fx.shadowBlur = 0;
-  fx.fillStyle = 'rgba(30,24,50,0.85)';
+  fx.globalAlpha = alpha * 0.8;
+  fx.fillStyle = 'rgba(120,132,155,0.8)';
   fx.beginPath();
-  fx.ellipse(0, 0, f.s * 0.07, f.s * 0.42, 0, 0, Math.PI * 2);
+  fx.ellipse(0, 0, f.s * 0.055, f.s * 0.38, 0, 0, Math.PI * 2);
   fx.fill();
+  fx.strokeStyle = 'rgba(140,152,175,0.7)';
+  fx.lineWidth = 0.5;
+  for (const d of [-1, 1]) {
+    fx.beginPath();
+    fx.moveTo(0, -f.s * 0.34);
+    fx.quadraticCurveTo(d * f.s * 0.18, -f.s * 0.62, d * f.s * 0.26, -f.s * 0.55);
+    fx.stroke();
+  }
   fx.restore();
 }
 
