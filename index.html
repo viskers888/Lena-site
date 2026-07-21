@@ -5,19 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ОДА | Таро • Поле • Метаразбор</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400&family=Prata&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --gold: #c9a84c;
-    --gold-light: #e8c97a;
-    /* динамические переменные — управляются скроллом из JS */
-    --bg: #100d24;
-    --ink: #ece6f5;
-    --ink-muted: rgba(236,230,245,0.62);
-    --panel: rgba(255,255,255,0.045);
-    --panel-border: rgba(255,255,255,0.1);
+    --gold: #d4af5e;
+    --gold-light: #efd598;
+    --violet: #a78bfa;
+    /* динамические — управляются скроллом */
+    --bg: #0b0820;
+    --ink: #efeaf7;
+    --ink-muted: rgba(239,234,247,0.55);
+    --panel: rgba(255,255,255,0.04);
+    --panel-border: rgba(255,255,255,0.09);
   }
 
   html { scroll-behavior: smooth; }
@@ -25,400 +26,435 @@
   body {
     background: var(--bg);
     color: var(--ink);
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Manrope', sans-serif;
     font-weight: 300;
     overflow-x: hidden;
-    transition: background 0.15s linear;
   }
 
-  /* ФИКСИРОВАННЫЕ СЛОИ */
-  #scene, #flies {
-    position: fixed;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
+  @media (pointer: fine) { body, body a, body button { cursor: none; } }
+
+  /* ===== СЛОИ ===== */
+  .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .blob {
+    position: absolute;
+    width: 55vmax; height: 55vmax;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: var(--blobO, 0.55);
+    will-change: transform;
   }
+  .blob.b1 { top: -18vmax; left: -12vmax; background: radial-gradient(circle, var(--blob1, #3b2a6e), transparent 65%); animation: drift1 46s ease-in-out infinite alternate; }
+  .blob.b2 { bottom: -22vmax; right: -14vmax; background: radial-gradient(circle, var(--blob2, #6e4a2a), transparent 65%); animation: drift2 38s ease-in-out infinite alternate; }
+  .blob.b3 { top: 30vh; left: 55vw; width: 34vmax; height: 34vmax; background: radial-gradient(circle, var(--blob3, #2a4a6e), transparent 65%); opacity: calc(var(--blobO, 0.55) * 0.55); animation: drift1 52s ease-in-out infinite alternate-reverse; }
+  @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(9vmax, 6vmax) scale(1.15); } }
+  @keyframes drift2 { from { transform: translate(0,0) scale(1.1); } to { transform: translate(-8vmax, -5vmax) scale(0.95); } }
+
+  #scene, #flies { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
   #scene { z-index: 1; }
   #flies { z-index: 2; }
 
+  .grain {
+    position: fixed; inset: -50%;
+    width: 200%; height: 200%;
+    z-index: 40;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 9s steps(10) infinite;
+  }
+  @keyframes grain {
+    0%,100% { transform: translate(0,0); } 10% { transform: translate(-3%,2%); }
+    20% { transform: translate(2%,-4%); } 30% { transform: translate(-4%,-2%); }
+    40% { transform: translate(3%,3%); } 50% { transform: translate(-2%,4%); }
+    60% { transform: translate(4%,-3%); } 70% { transform: translate(-3%,-4%); }
+    80% { transform: translate(2%,2%); } 90% { transform: translate(-4%,3%); }
+  }
+
   .content { position: relative; z-index: 3; }
 
-  /* NAV */
+  /* ===== КУРСОР ===== */
+  .cursor-dot, .cursor-ring {
+    position: fixed; top: 0; left: 0;
+    z-index: 60; pointer-events: none;
+    border-radius: 50%;
+    display: none;
+  }
+  @media (pointer: fine) { .cursor-dot, .cursor-ring { display: block; } }
+  .cursor-dot { width: 5px; height: 5px; background: var(--gold-light); transform: translate(-50%,-50%); }
+  .cursor-ring {
+    width: 34px; height: 34px;
+    border: 1px solid rgba(212,175,94,0.55);
+    transform: translate(-50%,-50%);
+    transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
+  }
+  .cursor-ring.hover { width: 58px; height: 58px; border-color: rgba(212,175,94,0.9); background: rgba(212,175,94,0.07); }
+
+  /* ===== NAV ===== */
   nav {
-    position: fixed;
-    top: 0; left: 0; right: 0;
+    position: fixed; top: 0; left: 0; right: 0;
     z-index: 50;
-    padding: 22px 44px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    mask-image: linear-gradient(to bottom, black 65%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent);
+    padding: 26px 48px;
+    display: flex; justify-content: space-between; align-items: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    mask-image: linear-gradient(to bottom, black 60%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
   }
 
   .nav-logo {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.7rem;
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 300;
+    font-size: 1.05rem;
+    letter-spacing: 0.5em;
     color: var(--gold-light);
-    letter-spacing: 0.2em;
     text-decoration: none;
   }
 
-  .nav-links { display: flex; gap: 36px; list-style: none; }
-
+  .nav-links { display: flex; gap: 38px; list-style: none; }
   .nav-links a {
     color: var(--ink-muted);
     text-decoration: none;
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
+    font-size: 0.68rem;
+    font-weight: 400;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
-    transition: color 0.3s;
+    transition: color 0.35s;
+    position: relative;
   }
-  .nav-links a:hover { color: var(--gold-light); }
+  .nav-links a::after {
+    content: '';
+    position: absolute; left: 0; bottom: -6px;
+    width: 100%; height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(.16,1,.3,1);
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
 
   .nav-cta {
-    border: 1px solid var(--gold);
-    color: var(--gold);
-    padding: 10px 26px;
-    font-size: 0.68rem;
-    letter-spacing: 0.22em;
+    border: 1px solid rgba(212,175,94,0.5);
+    color: var(--gold-light);
+    padding: 11px 30px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.26em;
     text-transform: uppercase;
     text-decoration: none;
     border-radius: 100px;
-    transition: all 0.3s;
-    background: transparent;
+    background: rgba(212,175,94,0.06);
+    transition: all 0.4s;
   }
-  .nav-cta:hover { background: var(--gold); color: #14102a; }
+  .nav-cta:hover { background: var(--gold); border-color: var(--gold); color: #120e28; box-shadow: 0 8px 34px rgba(212,175,94,0.35); }
 
-  /* ТОЧКИ-НАВИГАЦИЯ ПЛАНЕТЫ */
+  /* ===== ТОЧКИ-ОРБИТА ===== */
   .orbit-nav {
-    position: fixed;
-    right: 30px;
-    top: 50%;
+    position: fixed; right: 34px; top: 50%;
     transform: translateY(-50%);
     z-index: 50;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+    display: flex; flex-direction: column; gap: 20px;
   }
-
   .orbit-dot {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: flex; align-items: center; gap: 14px;
     flex-direction: row-reverse;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
+    background: none; border: none; padding: 0;
   }
-
   .orbit-dot i {
-    width: 9px; height: 9px;
-    border-radius: 50%;
+    width: 8px; height: 8px; border-radius: 50%;
     border: 1px solid var(--gold);
     background: transparent;
-    transition: all 0.35s;
+    transition: all 0.4s;
     display: block;
   }
-
   .orbit-dot span {
-    font-size: 0.62rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
+    font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase;
     color: var(--ink-muted);
-    opacity: 0;
-    transform: translateX(6px);
-    transition: all 0.3s;
-    font-family: 'Montserrat', sans-serif;
+    opacity: 0; transform: translateX(8px);
+    transition: all 0.35s;
   }
-
   .orbit-dot:hover span { opacity: 1; transform: translateX(0); }
-  .orbit-dot.active i { background: var(--gold); box-shadow: 0 0 12px rgba(201,168,76,0.8); transform: scale(1.3); }
+  .orbit-dot.active i { background: var(--gold-light); box-shadow: 0 0 16px rgba(212,175,94,0.9); transform: scale(1.35); }
 
-  /* HERO */
+  /* ===== HERO ===== */
   .hero {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
     text-align: center;
     padding: 0 24px;
     position: relative;
   }
 
   .hero-eyebrow {
-    font-size: 0.68rem;
-    letter-spacing: 0.45em;
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.55em;
     text-transform: uppercase;
     color: var(--gold);
-    margin-bottom: 26px;
+    margin-bottom: 34px;
+    opacity: 0;
+    animation: riseIn 1.2s 0.3s cubic-bezier(.16,1,.3,1) forwards;
   }
 
   .hero-title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(4.5rem, 14vw, 11rem);
-    font-weight: 300;
-    line-height: 0.95;
-    letter-spacing: 0.08em;
-    color: var(--ink);
-    margin-bottom: 18px;
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 200;
+    font-size: clamp(3.2rem, 11vw, 8.5rem);
+    line-height: 1.04;
+    letter-spacing: 0.18em;
+    margin-bottom: 30px;
+    color: #f3ead2;
   }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  .hero-title .ch {
+    display: inline-block;
+    background: linear-gradient(115deg, #f3ead2 10%, var(--gold-light) 38%, #cbb4f5 72%, #f3ead2 95%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    opacity: 0;
+    transform: translateY(0.6em) rotate(4deg);
+    animation: chIn 1s cubic-bezier(.16,1,.3,1) forwards, shimmer 9s linear infinite;
+  }
+  @keyframes chIn { to { opacity: 1; transform: none; } }
 
   .hero-sub {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: clamp(1.05rem, 2.4vw, 1.5rem);
+    font-family: 'Prata', serif;
+    font-size: clamp(1rem, 2.2vw, 1.3rem);
     color: var(--ink-muted);
-    max-width: 520px;
-    margin: 0 auto 14px;
-    line-height: 1.5;
+    max-width: 540px;
+    line-height: 1.75;
+    opacity: 0;
+    animation: riseIn 1.2s 0.9s cubic-bezier(.16,1,.3,1) forwards;
   }
+
+  @keyframes riseIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
 
   .hero-hint {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
+    position: absolute; bottom: 104px; left: 50%;
     transform: translateX(-50%);
-    font-size: 0.62rem;
-    letter-spacing: 0.3em;
+    font-size: 0.58rem;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
     color: var(--gold);
-    opacity: 0.75;
-    animation: pulse 3s ease-in-out infinite;
     white-space: nowrap;
+    opacity: 0;
+    animation: hintPulse 4s 2s ease-in-out infinite;
   }
-
-  @keyframes pulse { 0%,100% { opacity: 0.35; } 50% { opacity: 0.85; } }
+  @keyframes hintPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.85; } }
 
   .scroll-hint {
-    position: absolute;
-    bottom: 34px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 1px; height: 46px;
+    position: absolute; bottom: 36px; left: 50%;
+    width: 1px; height: 48px;
     background: linear-gradient(to bottom, var(--gold), transparent);
-    animation: drop 2.2s ease-in-out infinite;
+    animation: drop 2.4s ease-in-out infinite;
   }
-  @keyframes drop { 0% { transform: translateX(-50%) scaleY(0); transform-origin: top; } 50% { transform: translateX(-50%) scaleY(1); } 100% { transform: translateX(-50%) scaleY(0); transform-origin: bottom; } }
+  @keyframes drop { 0% { transform: translateX(-50%) scaleY(0); transform-origin: top; } 55% { transform: translateX(-50%) scaleY(1); } 100% { transform: translateX(-50%) scaleY(0); transform-origin: bottom; } }
 
-  /* ОБЩЕЕ ДЛЯ СЕКЦИЙ */
-  section { padding: 110px 24px; position: relative; }
-
-  .inner { max-width: 1060px; margin: 0 auto; }
+  /* ===== СЕКЦИИ ===== */
+  section { padding: 130px 24px; position: relative; }
+  .inner { max-width: 1080px; margin: 0 auto; }
 
   .label {
-    font-size: 0.64rem;
-    letter-spacing: 0.42em;
+    font-size: 0.6rem;
+    font-weight: 400;
+    letter-spacing: 0.5em;
     text-transform: uppercase;
     color: var(--gold);
     display: block;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
   }
 
   .title {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: clamp(2.2rem, 5vw, 3.6rem);
-    font-weight: 300;
-    line-height: 1.15;
-    margin-bottom: 26px;
+    font-family: 'Prata', serif;
+    font-size: clamp(2rem, 4.6vw, 3.4rem);
+    font-weight: 400;
+    line-height: 1.25;
+    margin-bottom: 28px;
     color: var(--ink);
+    text-wrap: balance;
   }
 
   .glass {
-    background: var(--panel);
-    border: 1px solid var(--panel-border);
-    border-radius: 22px;
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: linear-gradient(var(--panel), var(--panel)) padding-box,
+                linear-gradient(150deg, rgba(212,175,94,0.5), rgba(255,255,255,0.06) 40%, rgba(167,139,250,0.3)) border-box;
+    border: 1px solid transparent;
+    border-radius: 26px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    position: relative;
+    overflow: hidden;
   }
+  .glass::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -20%), rgba(212,175,94,0.13), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.5s;
+    pointer-events: none;
+  }
+  .glass:hover::before { opacity: 1; }
 
   /* ABOUT */
-  .about .inner { max-width: 640px; text-align: center; }
-  .about p {
-    font-size: 0.95rem;
-    line-height: 2;
-    color: var(--ink-muted);
-    margin-bottom: 16px;
-  }
+  .about .inner { max-width: 660px; text-align: center; }
+  .about p { font-size: 0.95rem; line-height: 2.1; color: var(--ink-muted); margin-bottom: 18px; }
   .about p strong { color: var(--gold-light); font-weight: 400; }
 
   /* SERVICES */
-  .services-head { text-align: center; margin-bottom: 64px; }
+  .services-head { text-align: center; margin-bottom: 70px; }
 
   .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 22px;
+    grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+    gap: 24px;
   }
 
   .svc {
-    padding: 44px 32px;
-    cursor: pointer;
-    transition: transform 0.4s cubic-bezier(.2,.8,.2,1), border-color 0.4s;
-    position: relative;
-    overflow: hidden;
+    padding: 48px 34px 44px;
+    transition: transform 0.55s cubic-bezier(.16,1,.3,1);
   }
+  .svc:hover { transform: translateY(-10px); }
 
-  .svc:hover { transform: translateY(-8px); border-color: rgba(201,168,76,0.45); }
-
-  .svc-glyph {
-    width: 44px; height: 44px;
-    margin-bottom: 22px;
+  .svc-num {
+    font-family: 'Unbounded', sans-serif;
+    font-weight: 200;
+    font-size: 0.62rem;
+    letter-spacing: 0.3em;
     color: var(--gold);
+    opacity: 0.75;
+    display: block;
+    margin-bottom: 30px;
   }
+
+  .svc-glyph { width: 46px; height: 46px; margin-bottom: 26px; color: var(--gold-light); }
   .svc-glyph svg { width: 100%; height: 100%; }
 
   .svc h3 {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 1.55rem;
+    font-family: 'Prata', serif;
+    font-size: 1.45rem;
     font-weight: 400;
     color: var(--ink);
-    margin-bottom: 14px;
+    margin-bottom: 15px;
   }
-
-  .svc p { font-size: 0.83rem; line-height: 1.85; color: var(--ink-muted); }
-
-  .svc-tag {
-    position: absolute;
-    top: 20px; right: 22px;
-    font-size: 0.58rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--gold);
-    opacity: 0;
-    transition: opacity 0.3s;
-  }
-  .svc:hover .svc-tag { opacity: 0.8; }
+  .svc p { font-size: 0.83rem; line-height: 1.9; color: var(--ink-muted); }
 
   /* BRACELETS */
-  .bracelets .services-head p {
-    max-width: 480px; margin: 0 auto;
-    font-size: 0.86rem; line-height: 1.9; color: var(--ink-muted);
-  }
+  .bracelets .services-head p { max-width: 480px; margin: 0 auto; font-size: 0.87rem; line-height: 1.95; color: var(--ink-muted); }
 
-  .brace-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 22px;
-  }
+  .brace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 24px; }
 
   .brace {
-    aspect-ratio: 1;
-    border-radius: 22px;
+    aspect-ratio: 0.92;
+    border-radius: 26px;
     overflow: hidden;
     position: relative;
-    display: flex;
-    align-items: flex-end;
-    padding: 22px;
+    display: flex; align-items: flex-end;
+    padding: 26px;
     background:
-      radial-gradient(circle at 30% 30%, rgba(201,168,76,0.22), transparent 60%),
+      radial-gradient(circle at 32% 26%, rgba(212,175,94,0.28), transparent 58%),
+      radial-gradient(circle at 75% 80%, rgba(167,139,250,0.16), transparent 55%),
       var(--panel);
     border: 1px solid var(--panel-border);
-    transition: transform 0.4s cubic-bezier(.2,.8,.2,1);
+    transition: transform 0.55s cubic-bezier(.16,1,.3,1);
   }
-  .brace:hover { transform: translateY(-6px) rotate(-0.5deg); }
-
-  .brace img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover;
-  }
-
+  .brace:hover { transform: translateY(-8px) rotate(-0.6deg); }
+  .brace img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(.16,1,.3,1); }
+  .brace:hover img { transform: scale(1.06); }
   .brace span {
     position: relative;
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 1.05rem;
-    color: var(--ink);
-    text-shadow: 0 1px 10px rgba(0,0,0,0.4);
+    font-family: 'Prata', serif;
+    font-size: 1.02rem;
+    color: #f4efe6;
+    text-shadow: 0 2px 16px rgba(10,8,26,0.6);
   }
 
   /* REVIEWS */
-  .rev-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 22px;
-  }
-
-  .rev { padding: 36px 32px; }
-
-  .rev-stars { color: var(--gold); font-size: 0.68rem; letter-spacing: 0.25em; margin-bottom: 16px; }
-
-  .rev p { font-size: 0.84rem; line-height: 1.9; color: var(--ink-muted); margin-bottom: 20px; }
-
-  .rev cite {
-    font-family: 'Cormorant Garamond', serif;
-    font-style: italic;
-    font-size: 1rem;
-    color: var(--gold-light);
-  }
+  .rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
+  .rev { padding: 40px 34px; }
+  .rev-stars { color: var(--gold); font-size: 0.62rem; letter-spacing: 0.3em; margin-bottom: 18px; }
+  .rev p { font-size: 0.85rem; line-height: 1.95; color: var(--ink-muted); margin-bottom: 22px; }
+  .rev cite { font-family: 'Prata', serif; font-style: normal; font-size: 0.95rem; color: var(--gold-light); }
 
   /* CONTACT */
-  .contact { text-align: center; padding-bottom: 140px; }
-  .contact .inner { max-width: 560px; }
-  .contact-desc { font-size: 0.9rem; line-height: 1.9; color: var(--ink-muted); margin-bottom: 44px; }
+  .contact { text-align: center; padding-bottom: 150px; }
+  .contact .inner { max-width: 580px; }
+  .contact-desc { font-size: 0.9rem; line-height: 1.95; color: var(--ink-muted); margin-bottom: 48px; }
 
   .contact-btn {
     display: inline-block;
-    background: var(--gold);
+    background: linear-gradient(120deg, var(--gold), #e3bf6e 55%, var(--gold));
+    background-size: 200% 100%;
     color: #171128;
-    padding: 18px 54px;
-    font-size: 0.72rem;
+    padding: 19px 58px;
+    font-size: 0.68rem;
     font-weight: 500;
-    letter-spacing: 0.24em;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
     text-decoration: none;
     border-radius: 100px;
-    transition: all 0.3s;
-    margin-bottom: 34px;
+    transition: all 0.45s;
+    margin-bottom: 38px;
   }
-  .contact-btn:hover { background: var(--gold-light); transform: translateY(-3px); box-shadow: 0 16px 50px rgba(201,168,76,0.35); }
+  .contact-btn:hover { background-position: 100% 0; transform: translateY(-3px); box-shadow: 0 18px 60px rgba(212,175,94,0.4); }
 
-  .contact-social { display: flex; justify-content: center; gap: 28px; }
+  .contact-social { display: flex; justify-content: center; gap: 30px; }
   .contact-social a {
-    font-size: 0.68rem;
-    letter-spacing: 0.2em;
+    font-size: 0.64rem;
+    letter-spacing: 0.24em;
     text-transform: uppercase;
     color: var(--ink-muted);
     text-decoration: none;
-    transition: color 0.3s;
+    transition: color 0.35s;
   }
   .contact-social a:hover { color: var(--gold); }
 
   footer {
     position: relative; z-index: 3;
-    padding: 28px 44px;
-    display: flex;
-    justify-content: space-between;
+    padding: 30px 48px;
+    display: flex; justify-content: space-between;
     border-top: 1px solid var(--panel-border);
   }
-  footer p { font-size: 0.68rem; color: var(--ink-muted); letter-spacing: 0.12em; }
+  footer p { font-size: 0.64rem; color: var(--ink-muted); letter-spacing: 0.16em; }
 
-  /* ПОЯВЛЕНИЕ */
-  .fade { opacity: 0; transform: translateY(34px); transition: opacity 0.9s ease, transform 0.9s ease; }
-  .fade.in { opacity: 1; transform: translateY(0); }
+  /* ===== ПОЯВЛЕНИЕ ===== */
+  .fade {
+    opacity: 0;
+    transform: translateY(46px);
+    filter: blur(10px);
+    transition: opacity 1.1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1), filter 1.1s cubic-bezier(.16,1,.3,1);
+  }
+  .fade.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .fade { opacity: 1; transform: none; filter: none; }
+    .hero-title .ch { opacity: 1; transform: none; filter: none; }
+    .hero-eyebrow, .hero-sub { opacity: 1; }
+  }
 
   /* MOBILE */
   @media (max-width: 768px) {
-    nav { padding: 16px 20px; }
+    nav { padding: 18px 22px; }
     .nav-links { display: none; }
-    .orbit-nav { right: 14px; gap: 14px; }
-    section { padding: 70px 20px; }
-    .hero-hint { bottom: 84px; }
+    .orbit-nav { right: 16px; gap: 16px; }
+    section { padding: 80px 20px; }
+    .hero-hint { bottom: 88px; }
     footer { flex-direction: column; gap: 10px; text-align: center; }
   }
 </style>
 </head>
 <body>
 
+<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 <canvas id="scene"></canvas>
 <canvas id="flies"></canvas>
+<div class="grain"></div>
+<div class="cursor-ring" id="curRing"></div>
+<div class="cursor-dot" id="curDot"></div>
 
 <nav>
   <a href="#" class="nav-logo">ОДА</a>
@@ -440,16 +476,14 @@
 
 <div class="content">
 
-  <!-- HERO -->
   <section class="hero">
     <p class="hero-eyebrow">Таро · Поле · Метаразбор · Чистки</p>
-    <h1 class="hero-title">ОДА</h1>
+    <h1 class="hero-title" id="heroTitle">ОДА</h1>
     <p class="hero-sub">Елена — мастер работы с полем и тонкими энергиями. Помогаю увидеть настоящие причины происходящего — и путь к себе.</p>
     <p class="hero-hint">✦ нажми на сферу — она покажет практики ✦</p>
     <div class="scroll-hint"></div>
   </section>
 
-  <!-- ABOUT -->
   <section class="about" id="about">
     <div class="inner fade">
       <span class="label">Обо мне</span>
@@ -460,7 +494,6 @@
     </div>
   </section>
 
-  <!-- SERVICES -->
   <section class="services" id="services">
     <div class="inner">
       <div class="services-head fade">
@@ -469,26 +502,26 @@
       </div>
       <div class="services-grid">
         <div class="svc glass fade" id="svc-0" data-state="0">
-          <span class="svc-tag">грань I</span>
-          <div class="svc-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 3 L19 12 L12 21 L5 12 Z"/><path d="M12 7 L16 12 L12 17 L8 12 Z"/></svg></div>
+          <span class="svc-num">I</span>
+          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 L37 24 L24 42 L11 24 Z"/><path d="M24 14 L31.5 24 L24 34 L16.5 24 Z" opacity="0.55"/><circle cx="24" cy="24" r="2" opacity="0.8"/></svg></div>
           <h3>Таро</h3>
           <p>Расклады на живые вопросы — отношения, работа, деньги, здоровье. Честный ответ без прикрас.</p>
         </div>
         <div class="svc glass fade" id="svc-1" data-state="1">
-          <span class="svc-tag">грань II</span>
-          <div class="svc-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 3c4 3 6 6 6 9a6 6 0 1 1-12 0c0-3 2-6 6-9z"/><path d="M12 9c1.5 1.2 2.4 2.4 2.4 3.8a2.4 2.4 0 1 1-4.8 0C9.6 11.4 10.5 10.2 12 9z"/></svg></div>
+          <span class="svc-num">II</span>
+          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><circle cx="24" cy="24" r="6"/><ellipse cx="24" cy="24" rx="16" ry="7" opacity="0.55"/><ellipse cx="24" cy="24" rx="16" ry="7" transform="rotate(60 24 24)" opacity="0.4"/><ellipse cx="24" cy="24" rx="16" ry="7" transform="rotate(-60 24 24)" opacity="0.4"/></svg></div>
           <h3>Работа через поле</h3>
           <p>Считывание вашего поля, выявление блоков и искажений, которые мешают жить в полную силу.</p>
         </div>
         <div class="svc glass fade" id="svc-2" data-state="2">
-          <span class="svc-tag">грань III</span>
-          <div class="svc-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 12c-1-3-4-5-8-5 1 4 4 7 8 7zm0 0c1-3 4-5 8-5-1 4-4 7-8 7zm0 2v5"/><circle cx="12" cy="11" r="0.8"/></svg></div>
+          <span class="svc-num">III</span>
+          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M24 22 C20 12, 8 10, 5 15 C8 24, 17 27, 24 24 Z" opacity="0.9"/><path d="M24 22 C28 12, 40 10, 43 15 C40 24, 31 27, 24 24 Z" opacity="0.55"/><path d="M24 24 v12" /><path d="M22 40 c1-2 3-2 4 0" opacity="0.7"/></svg></div>
           <h3>Метаразбор</h3>
           <p>Глубинный разбор ситуации через поле. Скрытые причины становятся видимыми — и появляется выход.</p>
         </div>
         <div class="svc glass fade" id="svc-3" data-state="3">
-          <span class="svc-tag">грань IV</span>
-          <div class="svc-glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 6h16M6 10h12M8 14h8M10 18h4"/></svg></div>
+          <span class="svc-num">IV</span>
+          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M10 12 h28" opacity="0.9"/><path d="M14 19 h22" opacity="0.7"/><path d="M18 26 h15" opacity="0.55"/><path d="M21 33 h9" opacity="0.4"/><path d="M23.5 40 h4" opacity="0.3"/></svg></div>
           <h3>Чистки</h3>
           <p>Энергетические чистки человека и пространства. Снятие негативных программ, возврат баланса.</p>
         </div>
@@ -496,7 +529,6 @@
     </div>
   </section>
 
-  <!-- BRACELETS -->
   <section class="bracelets" id="bracelets">
     <div class="inner">
       <div class="services-head fade">
@@ -513,7 +545,6 @@
     </div>
   </section>
 
-  <!-- REVIEWS -->
   <section class="reviews" id="reviews">
     <div class="inner">
       <div class="services-head fade">
@@ -550,7 +581,6 @@
     </div>
   </section>
 
-  <!-- CONTACT -->
   <section class="contact" id="contact">
     <div class="inner fade">
       <span class="label">Готовы начать?</span>
@@ -578,27 +608,34 @@
 <script type="module">
 import * as THREE from 'three';
 
-/* ============ ЦВЕТА ФОНА: тёмный → светлый по скроллу ============ */
-const darkBG  = [16, 13, 36];      // индиго-ночь
-const midBG   = [74, 52, 84];      // тёплый фиолетово-сливовый мост
-const warmBG  = [196, 160, 138];   // рассветный персиково-терракотовый
-const lightBG = [244, 238, 227];   // тёплый молочный
-const darkInk = [236, 230, 245];
-const lightInk = [42, 36, 56];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+/* ============ ЦВЕТА: тёмный → светлый по скроллу ============ */
 const lerp = (a, b, t) => a + (b - a) * t;
 const rgb = (c) => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
+const mix = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
 
-/* многоступенчатый градиент, чтобы переход не проходил через грязно-серый */
-function bgAt(t) {
-  const stops = [[0, darkBG], [0.35, midBG], [0.65, warmBG], [1, lightBG]];
+const bgStops = [
+  [0,    [11, 8, 32]],     // глубокий индиго
+  [0.35, [52, 34, 74]],    // сливовый
+  [0.65, [176, 138, 128]], // пыльная роза / рассвет
+  [1,    [243, 237, 226]], // тёплый молочный
+];
+const blobStops = {
+  b1: [[0, [59, 42, 110]], [0.5, [122, 74, 120]], [1, [232, 200, 160]]],
+  b2: [[0, [110, 74, 42]], [0.5, [160, 96, 88]],  [1, [214, 178, 138]]],
+  b3: [[0, [42, 74, 110]], [0.5, [110, 84, 140]], [1, [226, 194, 208]]],
+};
+const darkInk = [239, 234, 247], lightInk = [43, 36, 58];
+
+function stopMix(stops, t) {
   for (let i = 1; i < stops.length; i++) {
     if (t <= stops[i][0]) {
       const k = (t - stops[i-1][0]) / (stops[i][0] - stops[i-1][0]);
-      return stops[i-1][1].map((v, j) => lerp(v, stops[i][1][j], k));
+      return mix(stops[i-1][1], stops[i][1], k);
     }
   }
-  return lightBG;
+  return stops[stops.length - 1][1];
 }
 
 let scrollP = 0;
@@ -606,20 +643,46 @@ function updateScroll() {
   const max = document.documentElement.scrollHeight - innerHeight;
   scrollP = max > 0 ? Math.min(1, scrollY / max) : 0;
   const t = scrollP;
-  const bg  = bgAt(t);
-  const inkT = Math.max(0, (t - 0.45) / 0.55); // текст остаётся светлым дольше
-  const ink = darkInk.map((v,i) => lerp(v, lightInk[i], inkT));
   const r = document.documentElement.style;
-  r.setProperty('--bg',  rgb(bg));
+  r.setProperty('--bg', rgb(stopMix(bgStops, t)));
+  r.setProperty('--blob1', rgb(stopMix(blobStops.b1, t)));
+  r.setProperty('--blob2', rgb(stopMix(blobStops.b2, t)));
+  r.setProperty('--blob3', rgb(stopMix(blobStops.b3, t)));
+  const inkT = Math.min(1, Math.max(0, (t - 0.3) / 0.45));
+  const ink = mix(darkInk, lightInk, inkT);
   r.setProperty('--ink', rgb(ink));
   r.setProperty('--ink-muted', `rgba(${ink[0]|0},${ink[1]|0},${ink[2]|0},0.62)`);
-  r.setProperty('--panel', t > 0.6 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.045)');
-  r.setProperty('--panel-border', t > 0.6 ? 'rgba(42,36,56,0.12)' : 'rgba(255,255,255,0.1)');
+  r.setProperty('--panel', t > 0.5 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.04)');
+  r.setProperty('--panel-border', t > 0.5 ? 'rgba(43,36,58,0.14)' : 'rgba(255,255,255,0.09)');
+  r.setProperty('--blobO', String(lerp(0.55, 0.28, t)));
 }
 addEventListener('scroll', updateScroll, { passive: true });
 updateScroll();
 
-/* ============ THREE: ПЛАНЕТА-СФЕРА С 4 ГРАНЯМИ ============ */
+/* ============ ЗАГОЛОВОК ПО БУКВАМ ============ */
+const ht = document.getElementById('heroTitle');
+ht.innerHTML = [...ht.textContent].map((c, i) =>
+  `<span class="ch" style="animation-delay:${0.35 + i * 0.09}s">${c}</span>`).join('');
+
+/* ============ КУРСОР ============ */
+const curDot = document.getElementById('curDot'), curRing = document.getElementById('curRing');
+let cx = -100, cy = -100, rx = -100, ry = -100;
+addEventListener('pointermove', (e) => { cx = e.clientX; cy = e.clientY; });
+document.querySelectorAll('a, button, .svc, .brace').forEach(el => {
+  el.addEventListener('pointerenter', () => curRing.classList.add('hover'));
+  el.addEventListener('pointerleave', () => curRing.classList.remove('hover'));
+});
+
+/* подсветка стеклянных карточек за курсором */
+document.querySelectorAll('.glass').forEach(el => {
+  el.addEventListener('pointermove', (e) => {
+    const b = el.getBoundingClientRect();
+    el.style.setProperty('--mx', ((e.clientX - b.left) / b.width * 100) + '%');
+    el.style.setProperty('--my', ((e.clientY - b.top) / b.height * 100) + '%');
+  });
+});
+
+/* ============ THREE: ЖИДКАЯ СФЕРА ============ */
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -628,125 +691,226 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
 camera.position.set(0, 0, 9);
 
-scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-const key = new THREE.DirectionalLight(0xfff2d0, 1.4); key.position.set(4, 5, 6); scene.add(key);
-const rim = new THREE.DirectionalLight(0x8a6cff, 0.8); rim.position.set(-5, -2, -4); scene.add(rim);
+scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+const key = new THREE.DirectionalLight(0xffe9bd, 1.5); key.position.set(4, 5, 6); scene.add(key);
+const rim = new THREE.DirectionalLight(0x8a6cff, 1.0); rim.position.set(-5, -2, -4); scene.add(rim);
 
 const planet = new THREE.Group();
 scene.add(planet);
 
-/* оболочка: low-poly полупрозрачное стекло */
-const shellGeo = new THREE.IcosahedronGeometry(2.1, 1);
-const shell = new THREE.Mesh(shellGeo, new THREE.MeshPhysicalMaterial({
-  color: 0xc9a84c, metalness: 0.1, roughness: 0.15,
-  transparent: true, opacity: 0.13, flatShading: true, side: THREE.DoubleSide
-}));
-planet.add(shell);
+/* --- шейдер «жидкой» переливающейся оболочки --- */
+const noiseGLSL = `
+vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
+vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
+vec4 permute(vec4 x){return mod289(((x*34.)+1.)*x);}
+vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
+float snoise(vec3 v){
+  const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);
+  vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
+  vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
+  vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;
+  i=mod289(i);
+  vec4 p=permute(permute(permute(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));
+  float n_=0.142857142857;vec3 ns=n_*D.wyz-D.xzx;
+  vec4 j=p-49.*floor(p*ns.z*ns.z);
+  vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);
+  vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);
+  vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
+  vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));
+  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
+  vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
+  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
+  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
+  vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;
+  return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
+}`;
 
-const wire = new THREE.LineSegments(
-  new THREE.EdgesGeometry(shellGeo),
-  new THREE.LineBasicMaterial({ color: 0xc9a84c, transparent: true, opacity: 0.35 })
-);
-planet.add(wire);
-
-/* fresnel-свечение по краю */
-const glow = new THREE.Mesh(
-  new THREE.SphereGeometry(2.35, 48, 48),
+const orbUniforms = {
+  uTime: { value: 0 },
+  uFade: { value: 1 },       // приглушение на светлом фоне
+};
+const orb = new THREE.Mesh(
+  new THREE.SphereGeometry(2.15, 160, 160),
   new THREE.ShaderMaterial({
-    transparent: true, side: THREE.BackSide, depthWrite: false,
-    uniforms: { c: { value: new THREE.Color(0xc9a84c) }, op: { value: 0.55 } },
-    vertexShader: `varying float vI; void main(){ vec3 n = normalize(normalMatrix * normal); vec3 v = normalize((modelViewMatrix * vec4(position,1.)).xyz); vI = pow(1.0 - abs(dot(n, -v)), 2.5); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
-    fragmentShader: `uniform vec3 c; uniform float op; varying float vI; void main(){ gl_FragColor = vec4(c, vI * op); }`
+    transparent: true,
+    depthWrite: false,
+    uniforms: orbUniforms,
+    vertexShader: noiseGLSL + `
+      uniform float uTime;
+      varying vec3 vN; varying vec3 vPos; varying float vD;
+      void main() {
+        float d = snoise(normal * 1.6 + uTime * 0.16) * 0.09
+                + snoise(normal * 4.2 - uTime * 0.1) * 0.03;
+        vec3 p = position + normal * d;
+        vD = d;
+        vN = normalize(normalMatrix * normal);
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        vPos = mv.xyz;
+        gl_Position = projectionMatrix * mv;
+      }`,
+    fragmentShader: `
+      uniform float uTime; uniform float uFade;
+      varying vec3 vN; varying vec3 vPos; varying float vD;
+      void main() {
+        vec3 V = normalize(-vPos);
+        float F = pow(1.0 - abs(dot(vN, V)), 2.0);
+        /* переливы: глубокий фиолет -> магента -> золото по френелю и рельефу */
+        vec3 deep   = vec3(0.16, 0.09, 0.34);
+        vec3 plum   = vec3(0.45, 0.20, 0.52);
+        vec3 goldC  = vec3(0.92, 0.75, 0.42);
+        vec3 lilac  = vec3(0.66, 0.55, 0.98);
+        vec3 col = mix(deep, plum, smoothstep(-0.09, 0.12, vD));
+        col = mix(col, lilac, F * 0.65);
+        col = mix(col, goldC, pow(F, 2.6));
+        float a = (0.16 + F * 0.72) * uFade;
+        gl_FragColor = vec4(col, a);
+      }`
   })
 );
-planet.add(glow);
+planet.add(orb);
+
+/* мягкий ореол-атмосфера */
+const halo = new THREE.Mesh(
+  new THREE.SphereGeometry(2.6, 48, 48),
+  new THREE.ShaderMaterial({
+    transparent: true, side: THREE.BackSide, depthWrite: false,
+    uniforms: { uFade: { value: 1 } },
+    vertexShader: `varying float vI; void main(){ vec3 n = normalize(normalMatrix * normal); vec3 v = normalize((modelViewMatrix * vec4(position,1.)).xyz); vI = pow(1.0 - abs(dot(n, -v)), 3.2); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
+    fragmentShader: `uniform float uFade; varying float vI; void main(){ vec3 c = mix(vec3(0.83,0.69,0.37), vec3(0.62,0.5,0.95), 0.35); gl_FragColor = vec4(c, vI * 0.4 * uFade); }`
+  })
+);
+planet.add(halo);
+
+/* кольцо из частиц вокруг сферы */
+const ringGeo = new THREE.BufferGeometry();
+{
+  const N = 900, pos = new Float32Array(N * 3), sz = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 2.9 + Math.random() * 1.15 + (Math.random() < 0.2 ? Math.random() * 0.6 : 0);
+    pos[i*3] = Math.cos(a) * r;
+    pos[i*3+1] = (Math.random() - 0.5) * 0.16;
+    pos[i*3+2] = Math.sin(a) * r;
+    sz[i] = Math.random();
+  }
+  ringGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+}
+const ring = new THREE.Points(ringGeo, new THREE.PointsMaterial({ color: 0xd4af5e, size: 0.028, transparent: true, opacity: 0.75, blending: THREE.AdditiveBlending, depthWrite: false }));
+ring.rotation.x = 1.05; ring.rotation.z = -0.22;
+planet.add(ring);
 
 /* ---- 4 внутренних объекта ---- */
 const inner = new THREE.Group();
 planet.add(inner);
-const states = []; // { group, update(t) }
+const states = [];
 
 /* 0: КРИСТАЛЛ (Таро) */
 {
   const g = new THREE.Group();
-  const mat = new THREE.MeshPhysicalMaterial({ color: 0x9b6cff, metalness: 0.3, roughness: 0.1, emissive: 0x4a2c8f, emissiveIntensity: 0.6, flatShading: true });
-  const main = new THREE.Mesh(new THREE.OctahedronGeometry(0.85), mat); g.add(main);
-  for (let i = 0; i < 3; i++) {
-    const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.2), mat.clone());
-    const a = i / 3 * Math.PI * 2;
-    s.position.set(Math.cos(a) * 1.15, Math.sin(a * 1.7) * 0.5, Math.sin(a) * 1.15);
+  const mat = new THREE.MeshPhysicalMaterial({ color: 0xb08cff, metalness: 0.45, roughness: 0.08, emissive: 0x5b34b8, emissiveIntensity: 0.75, flatShading: true, transparent: true, opacity: 0.96 });
+  const main = new THREE.Mesh(new THREE.OctahedronGeometry(0.8), mat); g.add(main);
+  for (let i = 0; i < 4; i++) {
+    const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.14 + Math.random() * 0.1), mat.clone());
+    const a = i / 4 * Math.PI * 2;
+    s.position.set(Math.cos(a) * 1.2, Math.sin(a * 1.7) * 0.5, Math.sin(a) * 1.2);
     g.add(s);
   }
-  states.push({ group: g, update: (t) => { g.rotation.y = t * 0.6; g.children[0].rotation.x = t * 0.4; g.children.forEach((c, i) => { if (i > 0) c.position.y = Math.sin(t * 1.4 + i * 2) * 0.5; }); } });
-}
-
-/* 1: ОГОНЬ (Поле) — частицы вверх */
-{
-  const g = new THREE.Group();
-  const N = 220;
-  const pos = new Float32Array(N * 3), seed = new Float32Array(N);
-  for (let i = 0; i < N; i++) seed[i] = Math.random();
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xff8c3a, size: 0.09, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
-  g.add(pts);
-  const core = new THREE.PointLight(0xff7b2f, 2.2, 5); g.add(core);
+  const lt = new THREE.PointLight(0x9b6cff, 1.6, 6); g.add(lt);
   states.push({ group: g, update: (t) => {
-    const p = geo.attributes.position.array;
-    for (let i = 0; i < N; i++) {
-      const life = (t * 0.5 + seed[i]) % 1;
-      const r = (1 - life) * 0.55 * (0.4 + seed[i] * 0.6);
-      const a = seed[i] * 40 + t * 1.2;
-      p[i*3] = Math.cos(a) * r;
-      p[i*3+1] = life * 2.2 - 1.1;
-      p[i*3+2] = Math.sin(a) * r;
-    }
-    geo.attributes.position.needsUpdate = true;
+    g.rotation.y = t * 0.55;
+    g.children[0].rotation.x = t * 0.35;
+    g.children.forEach((c, i) => { if (i > 0 && c.isMesh) c.position.y = Math.sin(t * 1.3 + i * 2.1) * 0.5; });
   }});
 }
 
-/* 2: БАБОЧКА (Метаразбор) */
+/* 1: ОГОНЬ (Поле) */
 {
   const g = new THREE.Group();
+  const N = 260;
+  const pos = new Float32Array(N * 3), seed = new Float32Array(N);
+  const cols = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) seed[i] = Math.random();
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ vertexColors: true, size: 0.1, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
+  g.add(pts);
+  const core = new THREE.PointLight(0xff8c3a, 2.6, 6); g.add(core);
+  const cWarm = new THREE.Color(0xffd98a), cHot = new THREE.Color(0xff6a2a);
+  states.push({ group: g, update: (t) => {
+    const p = geo.attributes.position.array, c = geo.attributes.color.array;
+    for (let i = 0; i < N; i++) {
+      const life = (t * 0.5 + seed[i]) % 1;
+      const r = (1 - life) * 0.55 * (0.4 + seed[i] * 0.6);
+      const a = seed[i] * 40 + t * 1.3;
+      p[i*3] = Math.cos(a) * r;
+      p[i*3+1] = life * 2.3 - 1.15;
+      p[i*3+2] = Math.sin(a) * r;
+      const col = life < 0.35 ? cHot : cWarm;
+      c[i*3] = col.r; c[i*3+1] = col.g; c[i*3+2] = col.b;
+    }
+    geo.attributes.position.needsUpdate = true;
+    geo.attributes.color.needsUpdate = true;
+  }});
+}
+
+/* 2: БАБОЧКА (Метаразбор) — крылья с градиентной текстурой */
+{
+  const g = new THREE.Group();
+  const wc = document.createElement('canvas'); wc.width = wc.height = 256;
+  const wctx = wc.getContext('2d');
+  const grad = wctx.createRadialGradient(60, 130, 10, 128, 128, 150);
+  grad.addColorStop(0, '#e8d8ff'); grad.addColorStop(0.45, '#a78bfa'); grad.addColorStop(0.8, '#5b7cf0'); grad.addColorStop(1, '#2a3a8f');
+  wctx.fillStyle = grad; wctx.fillRect(0, 0, 256, 256);
+  const wtex = new THREE.CanvasTexture(wc);
+
   const wingShape = new THREE.Shape();
   wingShape.moveTo(0, 0);
-  wingShape.bezierCurveTo(0.7, 0.9, 1.5, 0.7, 1.35, -0.1);
-  wingShape.bezierCurveTo(1.3, -0.55, 0.65, -0.5, 0.35, -0.28);
-  wingShape.bezierCurveTo(0.6, -0.7, 0.5, -1.15, 0.12, -0.95);
-  wingShape.bezierCurveTo(0, -0.85, 0, -0.3, 0, 0);
-  const wingGeo = new THREE.ShapeGeometry(wingShape, 24);
-  const wingMat = new THREE.MeshPhysicalMaterial({ color: 0x7fd4ff, emissive: 0x2a6a9f, emissiveIntensity: 0.5, side: THREE.DoubleSide, transparent: true, opacity: 0.9, metalness: 0.2, roughness: 0.3 });
+  wingShape.bezierCurveTo(0.7, 0.95, 1.55, 0.72, 1.4, -0.1);
+  wingShape.bezierCurveTo(1.32, -0.56, 0.66, -0.5, 0.36, -0.28);
+  wingShape.bezierCurveTo(0.62, -0.72, 0.5, -1.18, 0.12, -0.96);
+  wingShape.bezierCurveTo(0, -0.86, 0, -0.3, 0, 0);
+  const wingGeo = new THREE.ShapeGeometry(wingShape, 32);
+  /* UV по границам фигуры */
+  wingGeo.computeBoundingBox();
+  const bb = wingGeo.boundingBox, uv = wingGeo.attributes.uv, vp = wingGeo.attributes.position;
+  for (let i = 0; i < uv.count; i++) {
+    uv.setXY(i, (vp.getX(i) - bb.min.x) / (bb.max.x - bb.min.x), (vp.getY(i) - bb.min.y) / (bb.max.y - bb.min.y));
+  }
+  const wingMat = new THREE.MeshPhysicalMaterial({ map: wtex, emissive: 0x6a5acd, emissiveIntensity: 0.4, emissiveMap: wtex, side: THREE.DoubleSide, transparent: true, opacity: 0.95, metalness: 0.15, roughness: 0.35 });
   const wL = new THREE.Mesh(wingGeo, wingMat);
   const wR = new THREE.Mesh(wingGeo, wingMat.clone()); wR.scale.x = -1;
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.055, 0.75, 4, 8), new THREE.MeshPhysicalMaterial({ color: 0x2a2438, roughness: 0.5 }));
-  g.add(wL, wR, body);
+  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.75, 4, 10), new THREE.MeshPhysicalMaterial({ color: 0x241d3a, roughness: 0.4, metalness: 0.3 }));
+  const lt = new THREE.PointLight(0x8a9cff, 1.1, 5); lt.position.set(0, 0.4, 0.6);
+  g.add(wL, wR, body, lt);
   g.scale.setScalar(0.85);
   states.push({ group: g, update: (t) => {
     const flap = Math.sin(t * 7) * 0.85;
     wL.rotation.y = flap; wR.rotation.y = -flap;
-    g.position.y = Math.sin(t * 2.2) * 0.28;
+    g.position.y = Math.sin(t * 2.1) * 0.3;
     g.rotation.y = Math.sin(t * 0.7) * 0.5;
     g.rotation.x = -0.35;
   }});
 }
 
-/* 3: ТОРНАДО (Чистки) — спираль частиц */
+/* 3: ТОРНАДО (Чистки) */
 {
   const g = new THREE.Group();
-  const N = 320;
+  const N = 380;
   const geo = new THREE.BufferGeometry();
   const pos = new Float32Array(N * 3), seed = new Float32Array(N);
   for (let i = 0; i < N; i++) seed[i] = Math.random();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xbfd8e8, size: 0.07, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color: 0xcfe0f0, size: 0.065, transparent: true, opacity: 0.85, blending: THREE.AdditiveBlending, depthWrite: false }));
   g.add(pts);
+  const lt = new THREE.PointLight(0x9fc4e8, 1.2, 5); g.add(lt);
   states.push({ group: g, update: (t) => {
     const p = geo.attributes.position.array;
     for (let i = 0; i < N; i++) {
-      const h = seed[i];                       // 0..1 высота
-      const y = h * 2.6 - 1.3;
-      const r = 0.12 + h * h * 0.95;
-      const a = seed[i] * 40 + t * (3.2 - h * 1.6);
+      const h = seed[i];
+      const y = h * 2.7 - 1.35;
+      const r = 0.1 + h * h * 1.0;
+      const a = seed[i] * 40 + t * (3.4 - h * 1.7);
       p[i*3] = Math.cos(a) * r;
       p[i*3+1] = y;
       p[i*3+2] = Math.sin(a) * r;
@@ -757,21 +921,23 @@ const states = []; // { group, update(t) }
 
 states.forEach((s, i) => { s.group.visible = i === 0; s.group.scale.setScalar(i === 0 ? 0.85 : 0.001); inner.add(s.group); });
 
-/* ---- звёздная пыль вокруг ---- */
-const dustGeo = new THREE.BufferGeometry();
-{
-  const N = 500, pos = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) {
-    const r = 5 + Math.random() * 14;
+/* ---- звёздная пыль: два слоя ---- */
+function makeDust(count, color, size, spread) {
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const r = 5 + Math.random() * spread;
     const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
     pos[i*3] = r * Math.sin(ph) * Math.cos(th);
     pos[i*3+1] = r * Math.sin(ph) * Math.sin(th) * 0.6;
     pos[i*3+2] = -Math.abs(r * Math.cos(ph)) - 2;
   }
-  dustGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  return new THREE.Points(geo, new THREE.PointsMaterial({ color, size, transparent: true, opacity: 0.65, depthWrite: false }));
 }
-const dust = new THREE.Points(dustGeo, new THREE.PointsMaterial({ color: 0xc9a84c, size: 0.035, transparent: true, opacity: 0.7 }));
-scene.add(dust);
+const dust1 = makeDust(420, 0xd4af5e, 0.03, 13);
+const dust2 = makeDust(260, 0xa78bfa, 0.024, 16);
+scene.add(dust1, dust2);
 
 /* ---- переключение состояний ---- */
 let cur = 0, switching = false;
@@ -785,7 +951,7 @@ function setState(n, scroll = true) {
   const t0 = performance.now();
   const spinFrom = planet.rotation.y;
   function anim(now) {
-    const k = Math.min(1, (now - t0) / 700);
+    const k = Math.min(1, (now - t0) / 750);
     const e = k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k+2, 3)/2;
     from.scale.setScalar(Math.max(0.001, 0.85 * (1 - Math.min(1, k * 2))));
     to.scale.setScalar(0.001 + 0.849 * Math.max(0, (k - 0.35) / 0.65));
@@ -801,26 +967,27 @@ function setState(n, scroll = true) {
 dots.forEach(d => d.addEventListener('click', () => setState(+d.dataset.state)));
 document.querySelectorAll('.svc').forEach(c => c.addEventListener('click', () => setState(+c.dataset.state, false)));
 
-/* клик по сфере — raycast */
+/* клик по сфере */
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
+let mouseX = 0, mouseY = 0;
 addEventListener('click', (e) => {
-  if (e.target.closest('.content a, nav, .orbit-nav, .svc')) return;
+  if (e.target.closest('.content a, nav, .orbit-nav, .svc, footer')) return;
   ptr.x = (e.clientX / innerWidth) * 2 - 1;
   ptr.y = -(e.clientY / innerHeight) * 2 + 1;
   ray.setFromCamera(ptr, camera);
-  if (ray.intersectObject(shell).length) setState((cur + 1) % 4);
+  if (ray.intersectObject(orb).length) setState((cur + 1) % 4);
 });
 addEventListener('pointermove', (e) => {
   mouseX = (e.clientX / innerWidth) * 2 - 1;
   mouseY = (e.clientY / innerHeight) * 2 - 1;
   ptr.x = mouseX; ptr.y = -mouseY;
   ray.setFromCamera(ptr, camera);
-  document.body.style.cursor = ray.intersectObject(shell).length ? 'pointer' : '';
+  const over = ray.intersectObject(orb).length > 0;
+  curRing.classList.toggle('hover', over || curRing.classList.contains('hover'));
+  if (over) curRing.classList.add('hover');
 });
 
-/* ---- рендер-цикл ---- */
-let mouseX = 0, mouseY = 0;
-
+/* ---- рендер ---- */
 function resize() {
   renderer.setSize(innerWidth, innerHeight);
   camera.aspect = innerWidth / innerHeight;
@@ -833,87 +1000,114 @@ const clock = new THREE.Clock();
 function loop() {
   requestAnimationFrame(loop);
   const t = clock.getElapsedTime();
-  if (!switching) planet.rotation.y += 0.0018;
-  planet.rotation.x = lerp(planet.rotation.x, mouseY * 0.18, 0.04);
-  planet.rotation.z = lerp(planet.rotation.z, -mouseX * 0.1, 0.04);
+  orbUniforms.uTime.value = t;
 
-  /* планета уходит вправо и чуть уменьшается при скролле (на десктопе) */
+  if (!switching && !reduceMotion) planet.rotation.y += 0.0016;
+  planet.rotation.x = lerp(planet.rotation.x, mouseY * 0.16, 0.04);
+  planet.rotation.z = lerp(planet.rotation.z, -mouseX * 0.09, 0.04);
+
   const side = innerWidth > 768 ? 2.6 : 0;
   planet.position.x = lerp(0, side, Math.min(1, scrollP * 2.2));
   planet.position.y = lerp(-0.3, 0.2, scrollP);
-  const s = lerp(1, 0.72, Math.min(1, scrollP * 1.6));
-  planet.scale.setScalar(s);
+  planet.scale.setScalar(lerp(1, 0.72, Math.min(1, scrollP * 1.6)));
 
-  /* свечение и пыль мягче на светлом фоне */
-  glow.material.uniforms.op.value = lerp(0.55, 0.18, scrollP);
-  shell.material.opacity = lerp(0.13, 0.28, scrollP);
-  dust.material.opacity = lerp(0.7, 0.15, scrollP);
-  dust.rotation.y = t * 0.008;
+  const fade = lerp(1, 0.55, scrollP);
+  orbUniforms.uFade.value = fade;
+  halo.material.uniforms.uFade.value = fade;
+  ring.material.opacity = lerp(0.75, 0.3, scrollP);
+  ring.rotation.y = t * 0.05;
+  dust1.material.opacity = lerp(0.65, 0.12, scrollP);
+  dust2.material.opacity = lerp(0.5, 0.08, scrollP);
+  dust1.rotation.y = t * 0.008;
+  dust2.rotation.y = -t * 0.005;
 
-  states[cur].update(t);
+  states[cur].update(reduceMotion ? 0 : t);
+
+  /* курсор */
+  rx = lerp(rx, cx, 0.16); ry = lerp(ry, cy, 0.16);
+  curDot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%,-50%)`;
+  curRing.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`;
+
   renderer.render(scene, camera);
 }
 loop();
 
-/* ============ 2D-БАБОЧКИ НА ВХОДЕ ============ */
+/* ============ 2D-БАБОЧКИ ============ */
 const fc = document.getElementById('flies');
 const fx = fc.getContext('2d');
 let fw, fh;
 function fresize() { fw = fc.width = innerWidth; fh = fc.height = innerHeight; }
 addEventListener('resize', fresize); fresize();
 
+const PALETTE = [
+  ['#cbb4f5', '#8a6cff'], ['#efd598', '#d4af5e'],
+  ['#a7d8f5', '#5b8cd0'], ['#f5c4d8', '#d07ba0'],
+];
 const flies = [];
-const FN = innerWidth > 768 ? 22 : 12;
+const FN = innerWidth > 768 ? 20 : 11;
 for (let i = 0; i < FN; i++) {
+  const [c1, c2] = PALETTE[i % PALETTE.length];
   flies.push({
     x: Math.random() * fw, y: Math.random() * fh,
     vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
-    s: 6 + Math.random() * 8, ph: Math.random() * 10,
-    hue: 190 + Math.random() * 90
+    s: 5 + Math.random() * 10, ph: Math.random() * 10,
+    depth: 0.5 + Math.random() * 0.5,   // масштаб+прозрачность для глубины
+    c1, c2,
   });
 }
-let mx = -999, my = -999;
-addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; });
+let mx2 = -999, my2 = -999;
+addEventListener('pointermove', (e) => { mx2 = e.clientX; my2 = e.clientY; });
 
 function drawFly(f, t) {
-  const flap = Math.sin(t * 9 + f.ph) * 0.7;
+  const flap = Math.sin(t * 8 + f.ph) * 0.75;
+  const alpha = f.depth * lerp(0.9, 0, Math.min(1, scrollP * 3.2));
+  if (alpha <= 0.01) return;
   fx.save();
   fx.translate(f.x, f.y);
   fx.rotate(Math.atan2(f.vy, f.vx) + Math.PI / 2);
-  fx.fillStyle = `hsla(${f.hue}, 70%, ${lerp(70, 45, scrollP)}%, ${lerp(0.85, 0, Math.min(1, scrollP * 3.2))})`;
+  fx.scale(f.depth, f.depth);
+  fx.globalAlpha = alpha;
+  fx.shadowColor = f.c2; fx.shadowBlur = 12 * f.depth;
+  const g1 = fx.createLinearGradient(0, -f.s, f.s * 1.3, f.s);
+  g1.addColorStop(0, f.c1); g1.addColorStop(1, f.c2);
+  fx.fillStyle = g1;
   for (const dir of [-1, 1]) {
     fx.save();
-    fx.scale(dir * (0.4 + Math.abs(flap) * 0.6), 1);
+    fx.scale(dir * (0.35 + Math.abs(flap) * 0.65), 1);
     fx.beginPath();
-    fx.ellipse(f.s * 0.55, -f.s * 0.15, f.s * 0.55, f.s * 0.38, -0.4, 0, Math.PI * 2);
-    fx.ellipse(f.s * 0.4, f.s * 0.3, f.s * 0.38, f.s * 0.26, 0.5, 0, Math.PI * 2);
+    fx.ellipse(f.s * 0.58, -f.s * 0.16, f.s * 0.58, f.s * 0.4, -0.42, 0, Math.PI * 2);
+    fx.fill();
+    fx.beginPath();
+    fx.ellipse(f.s * 0.4, f.s * 0.32, f.s * 0.4, f.s * 0.27, 0.5, 0, Math.PI * 2);
     fx.fill();
     fx.restore();
   }
+  /* тельце */
+  fx.shadowBlur = 0;
+  fx.fillStyle = 'rgba(30,24,50,0.85)';
+  fx.beginPath();
+  fx.ellipse(0, 0, f.s * 0.07, f.s * 0.42, 0, 0, Math.PI * 2);
+  fx.fill();
   fx.restore();
 }
 
 function fliesLoop() {
   requestAnimationFrame(fliesLoop);
   fx.clearRect(0, 0, fw, fh);
-  if (scrollP > 0.32) return; // улетели
+  if (scrollP > 0.34 || reduceMotion) return;
   const t = performance.now() / 1000;
   for (const f of flies) {
-    /* испуг от курсора */
-    const dx = f.x - mx, dy = f.y - my, d2 = dx * dx + dy * dy;
-    if (d2 < 140 * 140 && d2 > 1) {
+    const dx = f.x - mx2, dy = f.y - my2, d2 = dx * dx + dy * dy;
+    if (d2 < 150 * 150 && d2 > 1) {
       const d = Math.sqrt(d2);
-      f.vx += (dx / d) * 0.9; f.vy += (dy / d) * 0.9;
+      f.vx += (dx / d) * 0.95; f.vy += (dy / d) * 0.95;
     }
-    /* блуждание */
     f.vx += Math.sin(t * 0.8 + f.ph) * 0.02;
     f.vy += Math.cos(t * 0.6 + f.ph * 2) * 0.02;
-    /* при скролле — уносит вверх */
     f.vy -= scrollP * 1.2;
-    /* трение и лимит */
     f.vx *= 0.96; f.vy *= 0.96;
     const sp = Math.hypot(f.vx, f.vy);
-    if (sp > 4) { f.vx = f.vx / sp * 4; f.vy = f.vy / sp * 4; }
+    if (sp > 4.2) { f.vx = f.vx / sp * 4.2; f.vy = f.vy / sp * 4.2; }
     f.x += f.vx; f.y += f.vy;
     if (f.x < -30) f.x = fw + 30; if (f.x > fw + 30) f.x = -30;
     if (f.y < -40) f.y = fh + 30; if (f.y > fh + 40) f.y = -40;
@@ -924,7 +1118,7 @@ fliesLoop();
 
 /* ============ ПОЯВЛЕНИЕ СЕКЦИЙ ============ */
 const io = new IntersectionObserver((es) => {
-  es.forEach((e, i) => { if (e.isIntersecting) setTimeout(() => e.target.classList.add('in'), i * 90); });
+  es.forEach((e, i) => { if (e.isIntersecting) setTimeout(() => e.target.classList.add('in'), i * 110); });
 }, { threshold: 0.12 });
 document.querySelectorAll('.fade').forEach(el => io.observe(el));
 </script>
