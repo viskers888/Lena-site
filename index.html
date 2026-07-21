@@ -3,16 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ОДА | Эссенция баланса — энергетическое целительство</title>
-<meta name="description" content="Елена — парапсихолог. Таро, работа с полем, метаразбор, энергетические чистки. Бережное возвращение к внутреннему балансу.">
+<title>Ода — энергетическое целительство, Таро и метаразбор онлайн</title>
+<meta name="description" content="Елена — парапсихолог онлайн. Таро расклад, работа с энергетическим полем, метаразбор, энергетическая чистка от негатива, амулеты и браслеты из натуральных камней. Бережное возвращение к внутреннему балансу.">
+<meta name="robots" content="index, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- Open Graph / social preview — swap og:url and og:image for absolute
+     addresses once the site has a real domain -->
+<meta property="og:title" content="Ода — энергетическое целительство и Таро онлайн">
+<meta property="og:description" content="Парапсихолог Елена. Таро, метаразбор, энергетические чистки, амулеты из камней. Бережное возвращение к внутреннему балансу.">
+<meta property="og:image" content="images/hero-portrait.jpg">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Ода — энергетическое целительство и Таро онлайн">
+<meta name="twitter:description" content="Парапсихолог Елена. Таро, метаразбор, энергетические чистки, амулеты из камней.">
+<meta name="twitter:image" content="images/hero-portrait.jpg">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Елена — Ода",
+  "jobTitle": "Парапсихолог, энергетический целитель",
+  "description": "Энергетическое целительство, Таро, метаразбор, работа с полем",
+  "sameAs": ["https://t.me/ELENA_KOSS24"]
+}
+</script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  picture { display: block; }
 
   :root {
     /* button colors — brand identity, stays constant across themes */
     --accent: #8b7355;
+    --accent-soft: #a08060;
     --accent-hover: #6f5a41;
     --on-accent: #fafaf8;
 
@@ -20,16 +47,21 @@
     --bg-deep: #fafaf8;
     --bg-card: #f0ebe5;
     --accent-dim: #b8a089;
-    --text-pri: #2a2420;
+    --text-pri: #3a3530;
     --text-sec: #5c5450;
-    --text-muted: #8a8078;
+    --text-muted: #9a8e84;
     --border-subtle: rgba(139,115,85,0.14);
     --border-glow: rgba(139,115,85,0.28);
 
     /* glassmorphism */
-    --glass-fill: rgba(255,255,255,0.5);
-    --glass-fill-strong: rgba(255,255,255,0.68);
-    --glass-border: rgba(139,115,85,0.22);
+    --glass-fill: rgba(255,255,255,0.55);
+    --glass-fill-strong: rgba(255,255,255,0.75);
+    --glass-border: rgba(255,255,255,0.55);
+
+    /* corner radius scale — used everywhere instead of one-off values */
+    --r-sm: 10px;
+    --r-md: 16px;
+    --r-lg: 22px;
   }
 
   html { scroll-behavior: smooth; }
@@ -45,11 +77,11 @@
   }
 
   /* THEMES — light pastel palettes, brand accent stays gold-taupe */
-  body.theme-lavender  { --bg-deep: #f8f6fc; --bg-card: #eee6fa; --border-subtle: rgba(139,115,224,0.14); --border-glow: rgba(139,115,224,0.28); }
+  body.theme-lavender  { --bg-deep: #f8f6fc; --bg-card: #f0ecf5; --border-subtle: rgba(139,115,224,0.14); --border-glow: rgba(139,115,224,0.28); }
   body.theme-rose       { --bg-deep: #fdf6f4; --bg-card: #fae3de; --border-subtle: rgba(204,116,101,0.14); --border-glow: rgba(204,116,101,0.28); }
   body.theme-sage        { --bg-deep: #f5f9f4; --bg-card: #e4f0e2; --border-subtle: rgba(101,150,110,0.14); --border-glow: rgba(101,150,110,0.28); }
   body.theme-moonstone   { --bg-deep: #f6f8fb; --bg-card: #e6edf5; --border-subtle: rgba(101,133,170,0.14); --border-glow: rgba(101,133,170,0.28); }
-  body.theme-golden      { --bg-deep: #fdf9f0; --bg-card: #faedcd; --border-subtle: rgba(201,150,50,0.16); --border-glow: rgba(201,150,50,0.3); }
+  body.theme-golden      { --bg-deep: #fdf9f0; --bg-card: #faedcd; --border-subtle: rgba(184,134,11,0.16); --border-glow: rgba(184,134,11,0.28); }
 
   em { font-style: italic; color: var(--accent); font-family: 'Cormorant Garamond', serif; font-weight: 400; }
 
@@ -60,21 +92,48 @@
 
   .measure { max-width: 760px; }
 
-  /* GLASSMORPHISM base */
+  /* GLASSMORPHISM base — needs something colorful behind it to actually
+     read as "glass"; .glow-bg supplies that (see below). */
   .glass {
-    background: var(--glass-fill);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, var(--glass-fill-strong), var(--glass-fill));
+    backdrop-filter: blur(20px) saturate(1.7);
+    -webkit-backdrop-filter: blur(20px) saturate(1.7);
     border: 1px solid var(--glass-border);
-    box-shadow: 0 8px 32px rgba(139,115,85,0.08), inset 0 1px 1px rgba(255,255,255,0.6);
-    transition: all 0.4s ease;
+    border-radius: var(--r-md);
+    box-shadow: 0 8px 32px rgba(139,115,85,0.14), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 0 rgba(139,115,85,0.06);
+    transition: transform 0.4s ease, box-shadow 0.4s ease, background 0.4s ease;
   }
   .glass:hover {
-    background: var(--glass-fill-strong);
-    border-color: var(--border-glow);
+    background: linear-gradient(135deg, rgba(255,255,255,0.88), var(--glass-fill-strong));
+    border-color: rgba(255,255,255,0.75);
     transform: translateY(-4px);
-    box-shadow: 0 18px 50px rgba(139,115,85,0.14), inset 0 1px 1px rgba(255,255,255,0.7);
+    box-shadow: 0 20px 50px rgba(139,115,85,0.2), inset 0 1px 0 rgba(255,255,255,0.9);
+    animation: glass-breathe 2.6s ease-in-out infinite;
   }
+  @keyframes glass-breathe {
+    0%, 100% { box-shadow: 0 20px 50px rgba(139,115,85,0.2), inset 0 1px 0 rgba(255,255,255,0.9); }
+    50% { box-shadow: 0 20px 58px rgba(139,115,85,0.3), inset 0 1px 0 rgba(255,255,255,0.9); }
+  }
+  @media (prefers-reduced-motion: reduce) { .glass:hover { animation: none; } }
+
+  /* READING PROGRESS */
+  .reading-progress {
+    position: fixed; top: 0; left: 0; height: 3px; width: 0%; z-index: 1000;
+    background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+    transition: width 0.15s linear;
+  }
+
+  /* Decorative colour glow — sits behind glass cards so backdrop-blur has
+     something to blur; without it "glass" on a near-white page just looks flat. */
+  .glow-bg { position: relative; overflow: hidden; }
+  .glow-bg::before, .glow-bg::after {
+    content: ''; position: absolute; border-radius: 50%; filter: blur(70px);
+    pointer-events: none; z-index: 0;
+  }
+  .glow-bg::before { width: 440px; height: 440px; background: var(--accent); opacity: 0.16; top: -120px; right: -100px; }
+  .glow-bg::after { width: 380px; height: 380px; background: var(--accent-soft); opacity: 0.16; bottom: -140px; left: -80px; }
 
   /* NAV */
   nav {
@@ -92,8 +151,8 @@
   }
   .nav-links { display: flex; gap: 36px; list-style: none; }
   .nav-links a {
-    color: var(--text-sec); text-decoration: none; font-size: 0.72rem;
-    letter-spacing: 0.18em; text-transform: uppercase; transition: color 0.3s;
+    color: var(--text-sec); text-decoration: none; font-size: 0.8rem;
+    letter-spacing: 0.16em; text-transform: uppercase; transition: color 0.3s;
   }
   .nav-links a:hover { color: var(--accent); }
   @media (max-width: 860px) { .nav-links { display: none; } }
@@ -105,9 +164,9 @@
     text-transform: uppercase; text-decoration: none; cursor: pointer; border: none;
     transition: all 0.3s;
   }
-  .btn-solid { background: var(--accent); color: var(--on-accent); border-radius: 2px 16px; }
+  .btn-solid { background: var(--accent); color: var(--on-accent); border-radius: var(--r-sm); }
   .btn-solid:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 12px 30px rgba(139,115,85,0.3); }
-  .btn-ghost { background: rgba(139,115,85,0.08); color: var(--accent); border: 1px solid var(--border-glow); border-radius: 2px 16px; }
+  .btn-ghost { background: rgba(139,115,85,0.08); color: var(--accent); border: 1px solid var(--border-glow); border-radius: var(--r-sm); }
   .btn-ghost:hover { background: rgba(139,115,85,0.16); transform: translateY(-2px); }
 
   /* HERO */
@@ -139,16 +198,19 @@
     max-width: 1300px; margin: 0 auto; padding: 0 clamp(20px,5vw,56px) 40px;
   }
   .disclaimer p {
-    font-size: 14.5px; line-height: 1.8; color: var(--text-muted); font-style: italic;
-    padding: 18px 26px; border-radius: 2px 20px 2px 20px;
+    font-size: 15.5px; line-height: 1.8; color: var(--text-muted); font-style: italic;
+    padding: 18px 26px; border-radius: var(--r-lg);
   }
   .disclaimer strong { color: var(--accent-dim); font-style: normal; }
 
-  /* SECTION shell */
-  .section { display: grid; grid-template-columns: 120px 1fr; column-gap: 32px; padding: 90px clamp(20px,5vw,56px); border-top: 1px solid var(--border-subtle); transition: background 0.8s ease; }
+  /* SECTION shell — .section is the full-bleed band (background/border span
+     the whole viewport); .section-inner centers the actual grid content so
+     wide screens don't leave a blank gap on the right. */
+  .section { padding: 90px clamp(20px,5vw,56px); border-top: 1px solid var(--border-subtle); transition: background 0.8s ease; }
   .section.on-card { background: var(--bg-card); }
+  .section-inner { display: grid; grid-template-columns: 120px 1fr; column-gap: 32px; max-width: 1300px; margin: 0 auto; position: relative; z-index: 1; }
   .section-num { font: 600 11px 'Inter', sans-serif; letter-spacing: 0.25em; color: var(--accent-dim); position: sticky; top: 90px; }
-  @media (max-width: 760px) { .section { grid-template-columns: 1fr; row-gap: 20px; } .section-num { position: static; } }
+  @media (max-width: 760px) { .section-inner { grid-template-columns: 1fr; row-gap: 20px; } .section-num { position: static; } }
 
   .section-content { max-width: 780px; }
   h2.title {
@@ -166,72 +228,73 @@
   }
   .philosophy-body { display: grid; grid-template-columns: 1fr 320px; gap: 36px; align-items: start; position: relative; z-index: 1; }
   .philosophy-text p { font: 300 17px/1.9 'Cormorant Garamond', serif; color: var(--text-sec); margin-bottom: 20px; }
-  .philosophy-img { width: 100%; border-radius: 4px; overflow: hidden; border: 1px solid var(--border-subtle); }
+  .philosophy-img { width: 100%; border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border-subtle); }
   .philosophy-img img { width: 100%; display: block; filter: saturate(0.9) brightness(1.02); }
   @media (max-width: 900px) { .philosophy-body { grid-template-columns: 1fr; } }
 
   /* SERVICES */
   .service-row {
     display: grid; grid-template-columns: 60px 1fr; gap: 22px; align-items: start;
-    padding: 26px; margin-bottom: 16px; border-radius: 4px 22px 4px 22px;
+    padding: 26px; margin-bottom: 16px; border-radius: var(--r-md);
   }
-  .service-row .icon { font-size: 26px; opacity: 0.85; }
-  .service-row h3 { font: 400 22px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 8px; }
-  .service-row p { font-size: 14px; line-height: 1.8; color: var(--text-sec); }
+  .service-row .icon { font-size: 28px; opacity: 0.85; }
+  .service-row h3 { font: 400 24px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 8px; }
+  .service-row p { font-size: 15.5px; line-height: 1.8; color: var(--text-sec); }
 
   /* HEALING (image + list) */
   .healing-body { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 46px; align-items: center; }
   .healing-media { position: relative; height: 440px; }
-  .healing-media .main { position: absolute; left: 0; top: 0; width: 72%; height: 72%; border-radius: 12px; overflow: hidden; box-shadow: 0 30px 60px rgba(139,115,85,0.14); }
+  .healing-media .main { position: absolute; left: 0; top: 0; width: 72%; height: 72%; border-radius: var(--r-lg); overflow: hidden; box-shadow: 0 30px 60px rgba(139,115,85,0.14); }
   .healing-media .circle { position: absolute; right: 0; bottom: 0; width: 56%; height: 56%; border-radius: 50%; overflow: hidden; border: 6px solid var(--bg-deep); }
   .healing-media img { width: 100%; height: 100%; object-fit: cover; filter: saturate(0.9) brightness(1.02); }
   .healing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
-  .healing-item { padding: 20px; border-radius: 4px 18px 4px 18px; }
-  .healing-item h4 { font: 400 16.5px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 6px; }
-  .healing-item p { font-size: 12.8px; line-height: 1.65; color: var(--text-sec); }
+  .healing-item { padding: 20px; border-radius: var(--r-md); }
+  .healing-item h4 { font: 400 18px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 6px; }
+  .healing-item p { font-size: 14.5px; line-height: 1.68; color: var(--text-sec); }
   @media (max-width: 900px) { .healing-body { grid-template-columns: 1fr; } .healing-grid { grid-template-columns: 1fr; } }
 
   /* META */
   .meta-body { display: grid; grid-template-columns: 1fr 320px; gap: 40px; }
   .meta-body p { font: 300 17px/1.85 'Cormorant Garamond', serif; color: var(--text-sec); margin-bottom: 16px; }
   .meta-list { margin-top: 20px; }
-  .meta-list-item { display: flex; gap: 12px; margin-bottom: 16px; padding: 14px 18px; border-radius: 4px 16px 4px 16px; }
+  .meta-list-item { display: flex; gap: 12px; margin-bottom: 16px; padding: 14px 18px; border-radius: var(--r-md); }
   .meta-list-item .arrow { color: var(--accent); font-size: 16px; margin-top: 1px; }
-  .meta-list-item p { font-size: 14px; margin: 0; line-height: 1.65; color: var(--text-sec); }
+  .meta-list-item p { font-size: 15px; margin: 0; line-height: 1.65; color: var(--text-sec); }
   .meta-list-item strong { color: var(--text-pri); font-weight: 500; }
-  .meta-img { border-radius: 4px; overflow: hidden; border: 1px solid var(--border-subtle); align-self: start; }
+  .meta-img { border-radius: var(--r-lg); overflow: hidden; border: 1px solid var(--border-subtle); align-self: start; }
   .meta-img img { width: 100%; display: block; filter: saturate(0.85) brightness(1.02); }
   @media (max-width: 900px) { .meta-body { grid-template-columns: 1fr; } }
 
   /* ENERGY */
-  .energy-img { width: 100%; height: 300px; object-fit: cover; border-radius: 4px; border: 1px solid var(--border-subtle); margin-bottom: 32px; filter: saturate(0.9) brightness(1.02); }
-  .energy-card { padding: 22px 26px; margin-bottom: 14px; border-radius: 4px 20px 4px 20px; }
-  .energy-card h4 { font: 400 17px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 8px; }
+  .energy-img { width: 100%; height: 300px; object-fit: cover; border-radius: var(--r-lg); border: 1px solid var(--border-subtle); margin-bottom: 32px; filter: saturate(0.9) brightness(1.02); }
+  .energy-card { padding: 22px 26px; margin-bottom: 14px; border-radius: var(--r-md); }
+  .energy-card h4 { font: 400 18.5px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 8px; }
   .energy-card h4 .ic { color: var(--accent); margin-right: 8px; }
-  .energy-card p { font-size: 14px; line-height: 1.75; color: var(--text-sec); }
+  .energy-card p { font-size: 15px; line-height: 1.75; color: var(--text-sec); }
 
   /* CRYSTALS */
   .crystals-body { display: grid; grid-template-columns: 320px 1fr; gap: 36px; align-items: start; }
   .crystals-media { display: flex; flex-direction: column; gap: 16px; }
-  .crystals-media img { width: 100%; border-radius: 4px; border: 1px solid var(--border-subtle); object-fit: cover; filter: saturate(0.92) brightness(1.02); }
-  .crystals-media img:first-child { height: 300px; }
-  .crystals-media img:last-child { height: 230px; }
+  .crystals-media img { width: 100%; height: 100%; border-radius: var(--r-md); border: 1px solid var(--border-subtle); object-fit: cover; filter: saturate(0.92) brightness(1.02); }
+  .crystals-media picture:first-child { height: 300px; }
+  .crystals-media picture:last-child { height: 230px; }
   .crystals-text p { font: 300 16px/1.85 'Cormorant Garamond', serif; color: var(--text-sec); margin-bottom: 16px; }
-  .crystals-feature { padding: 16px 20px; margin-bottom: 12px; border-radius: 4px 16px 4px 16px; }
-  .crystals-feature h4 { font: 400 16px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 4px; }
-  .crystals-feature p { font-size: 13px; line-height: 1.6; color: var(--text-sec); }
-  @media (max-width: 900px) { .crystals-body { grid-template-columns: 1fr; } .crystals-media { flex-direction: row; } .crystals-media img:first-child, .crystals-media img:last-child { height: 220px; } }
+  .crystals-feature { padding: 16px 20px; margin-bottom: 12px; border-radius: var(--r-md); }
+  .crystals-feature h4 { font: 400 17.5px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 4px; }
+  .crystals-feature p { font-size: 14.5px; line-height: 1.6; color: var(--text-sec); }
+  @media (max-width: 900px) { .crystals-body { grid-template-columns: 1fr; } .crystals-media { flex-direction: row; } .crystals-media picture:first-child, .crystals-media picture:last-child { height: 220px; } .crystals-media picture { flex: 1; } }
   @media (max-width: 560px) { .crystals-media { flex-direction: column; } }
 
   /* PROCESS */
   .process { text-align: center; padding: 90px clamp(20px,5vw,56px); border-top: 1px solid var(--border-subtle); }
+  .process-inner { position: relative; z-index: 1; }
   .process .title { max-width: 700px; margin: 16px auto 18px; }
   .process .section-desc { max-width: 640px; margin: 0 auto 50px; }
   .process-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 22px; text-align: left; max-width: 1100px; margin: 0 auto; }
-  .process-step { padding: 22px 20px; border-radius: 4px 20px 4px 20px; }
+  .process-step { padding: 22px 20px; border-radius: var(--r-md); }
   .process-step .num { font: italic 300 24px 'Cormorant Garamond', serif; color: var(--accent); margin-bottom: 10px; }
-  .process-step h4 { font: 400 18px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 6px; }
-  .process-step p { font-size: 13px; color: var(--text-sec); line-height: 1.65; }
+  .process-step h4 { font: 400 19px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 6px; }
+  .process-step p { font-size: 14.5px; color: var(--text-sec); line-height: 1.65; }
   .process-closing { font: 300 italic 15px/1.75 'Cormorant Garamond', serif; color: var(--text-sec); max-width: 620px; margin: 46px auto 0; }
   @media (max-width: 860px) { .process-grid { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 520px) { .process-grid { grid-template-columns: 1fr; } }
@@ -245,10 +308,10 @@
   .cta-quote p { font: 300 italic 15px/1.75 'Cormorant Garamond', serif; color: var(--text-sec); }
   .contact-cta-body .section-desc { margin-bottom: 24px; }
   .cta-cards { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 26px; }
-  .cta-card { flex: 1; min-width: 150px; padding: 16px 18px; border-radius: 16px 4px 16px 4px; }
-  .cta-card h4 { font: 400 14px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 4px; }
+  .cta-card { flex: 1; min-width: 150px; padding: 16px 18px; border-radius: var(--r-md); }
+  .cta-card h4 { font: 400 15.5px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 4px; }
   .cta-card h4 .ic { color: var(--accent); margin-right: 6px; }
-  .cta-card p { font-size: 12px; line-height: 1.55; color: var(--text-sec); }
+  .cta-card p { font-size: 13.5px; line-height: 1.55; color: var(--text-sec); }
   .cta-btns { display: flex; gap: 12px; flex-wrap: wrap; }
   @media (max-width: 900px) { .contact-cta-body { grid-template-columns: 1fr; } .cta-media { order: -1; } }
 
@@ -256,34 +319,35 @@
   .testimonial { text-align: center; padding: 90px clamp(20px,5vw,56px); position: relative; border-top: 1px solid var(--border-subtle); }
   .testimonial .quote-mark {
     font: 800 clamp(90px,16vw,180px)/1 'Cormorant Garamond', serif; color: var(--accent);
-    opacity: 0.06; position: absolute; left: clamp(10px,4vw,40px); top: 20px;
+    opacity: 0.06; position: absolute; left: clamp(10px,4vw,40px); top: 20px; z-index: 0;
   }
+  .testimonial-inner { position: relative; z-index: 1; }
   .testimonial .title { max-width: 680px; margin: 16px auto 34px; text-align: center; }
   .testimonial-text {
     max-width: 640px; margin: 0 auto 20px; font: 300 italic 19px/1.8 'Cormorant Garamond', serif;
-    color: var(--text-pri); position: relative; z-index: 1; padding: 30px 34px; border-radius: 4px 28px 4px 28px;
+    color: var(--text-pri); position: relative; z-index: 1; padding: 30px 34px; border-radius: var(--r-lg);
   }
-  .testimonial-author { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
+  .testimonial-author { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); }
 
   /* CONTACT FORM */
   .contact-body { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 50px; }
-  .contact-body h3 { font: 300 22px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 14px; }
-  .contact-body > div > p { font-size: 13.5px; line-height: 1.8; color: var(--text-sec); margin-bottom: 22px; }
+  .contact-body h3 { font: 300 24px 'Cormorant Garamond', serif; color: var(--text-pri); margin-bottom: 14px; }
+  .contact-body > div > p { font-size: 15px; line-height: 1.8; color: var(--text-sec); margin-bottom: 22px; }
   .contact-meta { display: flex; flex-direction: column; gap: 12px; }
-  .contact-meta-row { display: flex; gap: 14px; font-size: 13px; color: var(--text-sec); }
-  .contact-meta-row .label { color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; min-width: 76px; font-size: 11px; }
-  .contact-form { display: flex; flex-direction: column; gap: 18px; padding: 34px; border-radius: 26px 4px 26px 4px; }
-  .contact-form label { display: block; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
+  .contact-meta-row { display: flex; gap: 14px; font-size: 14.5px; color: var(--text-sec); }
+  .contact-meta-row .label { color: var(--accent); text-transform: uppercase; letter-spacing: 0.15em; min-width: 76px; font-size: 12px; }
+  .contact-form { display: flex; flex-direction: column; gap: 18px; padding: 34px; border-radius: var(--r-lg); }
+  .contact-form label { display: block; font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; }
   .contact-form input, .contact-form textarea {
     width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border-subtle);
-    padding: 8px 0; color: var(--text-pri); font-family: 'Inter', sans-serif; font-size: 14px;
+    padding: 8px 0; color: var(--text-pri); font-family: 'Inter', sans-serif; font-size: 15.5px;
   }
   .contact-form input:focus, .contact-form textarea:focus { outline: none; border-bottom-color: var(--accent); }
   .contact-form textarea { min-height: 76px; resize: vertical; }
   @media (max-width: 860px) { .contact-body { grid-template-columns: 1fr; } }
 
   footer { text-align: center; padding: 34px 20px; border-top: 1px solid var(--border-subtle); }
-  footer p { font-size: 11px; color: var(--text-muted); letter-spacing: 0.1em; }
+  footer p { font-size: 13px; color: var(--text-muted); letter-spacing: 0.1em; }
 
   /* THEME SWITCHER */
   .theme-switcher {
@@ -309,6 +373,8 @@
 </head>
 <body class="theme-default">
 
+<div class="reading-progress" id="reading-progress"></div>
+
 <nav>
   <a href="#" class="nav-logo">ОДА</a>
   <ul class="nav-links">
@@ -330,74 +396,80 @@
       <a href="https://t.me/ELENA_KOSS24" target="_blank" class="btn btn-ghost">Начать путь →</a>
     </div>
     <div class="hero-media">
-      <div class="big"><img src="images/hero-portrait.jpg" alt="Елена"></div>
-      <div class="small"><img src="images/butterflies.jpg" alt="Тонкая энергия"></div>
+      <div class="big"><picture><source srcset="images/hero-portrait.webp" type="image/webp"><img src="images/hero-portrait.jpg" alt="Елена — парапсихолог, энергетическое целительство" fetchpriority="high"></picture></div>
+      <div class="small"><picture><source srcset="images/butterflies.webp" type="image/webp"><img src="images/butterflies.jpg" alt="Тонкая энергия — символ ментальной магии"></picture></div>
     </div>
   </div>
 </section>
 
-<div class="disclaimer">
+<div class="disclaimer glow-bg">
   <p class="glass"><strong>Важно:</strong> энергетическое исцеление и наполнение не заменяют визит к врачу. Физическое тело важно доверять специалисту, а энергетическое — целителю. Оба пути могут мягко поддерживать друг друга. Если есть подозрение на любые заболевания — немедленно обратитесь к врачу.</p>
 </div>
 
 <!-- 01 PHILOSOPHY -->
-<section class="section philosophy" id="philosophy">
-  <div class="section-num">01 / Философия</div>
-  <div class="section-content">
-    <div class="philosophy-watermark">бабочки</div>
-    <h2 class="title">Эффект <em>бабочки</em></h2>
-    <p class="section-desc">Есть тонкое представление: бабочка, едва коснувшись воздуха крылом на одном конце земли, может вызвать цунами на другом. В мире ментальной магии это не резкая метафора, а спокойный принцип работы.</p>
-    <div class="philosophy-body">
-      <div class="philosophy-text">
-        <p>Мы все бережно связаны единым энергетическим полем. Расстояние не мешает этому тихому контакту. Ода может работать в одной точке мира — а тебе станет заметно легче в другой.</p>
-        <p>Ментальная магия опирается на мягкое убеждение, что сознание, намерение и энергия способны деликатно влиять на реальность. Через общее поле можно передавать исцеление, ослаблять энергетические блокировки, возвращать гармонию — без физического присутствия, без границ, без лишнего напряжения.</p>
-        <p>Это не сказочное волшебство, а тихая, глубокая работа с тем, что объединяет нас всех — с энергией, намерением и общим полем.</p>
+<section class="section glow-bg philosophy" id="philosophy">
+  <div class="section-inner">
+    <div class="section-num">01 / Философия</div>
+    <div class="section-content">
+      <div class="philosophy-watermark">бабочки</div>
+      <h2 class="title">Эффект <em>бабочки</em></h2>
+      <p class="section-desc">Есть тонкое представление: бабочка, едва коснувшись воздуха крылом на одном конце земли, может вызвать цунами на другом. В мире ментальной магии это не резкая метафора, а спокойный принцип работы.</p>
+      <div class="philosophy-body">
+        <div class="philosophy-text">
+          <p>Мы все бережно связаны единым энергетическим полем. Расстояние не мешает этому тихому контакту. Ода может работать в одной точке мира — а тебе станет заметно легче в другой.</p>
+          <p>Ментальная магия опирается на мягкое убеждение, что сознание, намерение и энергия способны деликатно влиять на реальность. Через общее поле можно передавать исцеление, ослаблять энергетические блокировки, возвращать гармонию — без физического присутствия, без границ, без лишнего напряжения.</p>
+          <p>Это не сказочное волшебство, а тихая, глубокая работа с тем, что объединяет нас всех — с энергией, намерением и общим полем.</p>
+        </div>
+        <div class="philosophy-img"><picture><source srcset="images/connection.webp" type="image/webp"><img src="images/connection.jpg" alt="Связь через пространство — символ дистанционной энергетической работы" loading="lazy"></picture></div>
       </div>
-      <div class="philosophy-img"><img src="images/connection.jpg" alt="Связь через пространство"></div>
     </div>
   </div>
 </section>
 
 <!-- 02 SERVICES -->
-<section class="section on-card" id="services">
-  <div class="section-num">02 / Практики</div>
-  <div class="section-content">
-    <h2 class="title">Три мягких способа вернуть <em>внутренний баланс</em></h2>
-    <p class="section-desc">Каждая услуга — это бережная практика, созданная с вниманием и спокойствием. Мы подбираем её так, чтобы поддержать тебя именно там, где ты сейчас.</p>
+<section class="section glow-bg on-card" id="services">
+  <div class="section-inner">
+    <div class="section-num">02 / Практики</div>
+    <div class="section-content">
+      <h2 class="title">Три мягких способа вернуть <em>внутренний баланс</em></h2>
+      <p class="section-desc">Каждая услуга — это бережная практика, созданная с вниманием и спокойствием. Мы подбираем её так, чтобы поддержать тебя именно там, где ты сейчас.</p>
 
-    <div class="service-row glass">
-      <div class="icon">🔮</div>
-      <div><h3>Таро для ясности</h3><p>Нежное, сфокусированное прочтение, которое помогает бережно подсветить то, что уже откликается внутри, но пока ещё не оформилось в слова. Без жёстких предсказаний — только мягкое направление и чувство опоры.</p></div>
-    </div>
-    <div class="service-row glass">
-      <div class="icon">🌿</div>
-      <div><h3>Работа с полем</h3><p>Мягкий метаразбор жизненных ситуаций через тонкое считывание поля. Это помогает спокойно увидеть скрытые причины, энергетические блокировки и найти более гармоничный путь из непростых состояний.</p></div>
-    </div>
-    <div class="service-row glass">
-      <div class="icon">🕯</div>
-      <div><h3>Энергетические чистки</h3><p>Бережное очищение пространства, мягкая защита и восстановление внутреннего равновесия. Работа со свечами, кристаллами и деликатными ритуалами помогает ослабить негативные влияния.</p></div>
+      <div class="service-row glass">
+        <div class="icon">🔮</div>
+        <div><h3>Таро для ясности</h3><p>Нежное, сфокусированное прочтение, которое помогает бережно подсветить то, что уже откликается внутри, но пока ещё не оформилось в слова. Без жёстких предсказаний — только мягкое направление и чувство опоры.</p></div>
+      </div>
+      <div class="service-row glass">
+        <div class="icon">🌿</div>
+        <div><h3>Работа с полем</h3><p>Мягкий метаразбор жизненных ситуаций через тонкое считывание поля. Это помогает спокойно увидеть скрытые причины, энергетические блокировки и найти более гармоничный путь из непростых состояний.</p></div>
+      </div>
+      <div class="service-row glass">
+        <div class="icon">🕯</div>
+        <div><h3>Энергетические чистки</h3><p>Бережное очищение пространства, мягкая защита и восстановление внутреннего равновесия. Работа со свечами, кристаллами и деликатными ритуалами помогает ослабить негативные влияния.</p></div>
+      </div>
     </div>
   </div>
 </section>
 
 <!-- 03 HEALING -->
-<section class="section" id="healing">
-  <div class="section-num">03 / Исцеление</div>
-  <div class="section-content">
-    <div class="healing-body">
-      <div class="healing-media">
-        <div class="main"><img src="images/healing-light.jpg" alt="Мягкое исцеление"></div>
-        <div class="circle"><img src="images/elena-portrait.jpg" alt="Елена"></div>
-      </div>
-      <div>
-        <span class="eyebrow">03 / Исцеление</span>
-        <h2 class="title">Что я мягко <em>исцеляю</em></h2>
-        <p class="section-desc">Ода бережно работает с состояниями, которые порой сложно выразить словами, но которые тихо ощущаются каждый день.</p>
-        <div class="healing-grid">
-          <div class="healing-item glass"><h4>Головные боли и напряжение</h4><p>Бережная работа с ментальным полем помогает отпустить накопленное напряжение и вернуть ощущение мягкости, покоя и внутреннего расслабления.</p></div>
-          <div class="healing-item glass"><h4>Нарушения сна</h4><p>Неспокойный сон, бессонница, тревожные ночи — мягкая энергетическая работа помогает настроить более естественный ритм отдыха и тишины.</p></div>
-          <div class="healing-item glass"><h4>Лишний вес и тело</h4><p>Иногда тело бережно хранит то, что душа еще не успела отпустить. Мягкая работа с глубинными установками помогает постепенно освободиться.</p></div>
-          <div class="healing-item glass"><h4>Упадок и уныние</h4><p>Когда мир будто теряет краски, а сил не хватает даже на простые вещи, Ода помогает бережно вернуть внутренний свет, спокойствие и тихую опору внутри.</p></div>
+<section class="section glow-bg" id="healing">
+  <div class="section-inner">
+    <div class="section-num">03 / Исцеление</div>
+    <div class="section-content">
+      <div class="healing-body">
+        <div class="healing-media">
+          <div class="main"><picture><source srcset="images/healing-light.webp" type="image/webp"><img src="images/healing-light.jpg" alt="Мягкое энергетическое исцеление — свет и покой" loading="lazy"></picture></div>
+          <div class="circle"><picture><source srcset="images/elena-portrait.webp" type="image/webp"><img src="images/elena-portrait.jpg" alt="Елена — парапсихолог, энергетическое целительство" loading="lazy"></picture></div>
+        </div>
+        <div>
+          <span class="eyebrow">03 / Исцеление</span>
+          <h2 class="title">Что я мягко <em>исцеляю</em></h2>
+          <p class="section-desc">Ода бережно работает с состояниями, которые порой сложно выразить словами, но которые тихо ощущаются каждый день.</p>
+          <div class="healing-grid">
+            <div class="healing-item glass"><h4>Головные боли и напряжение</h4><p>Бережная работа с ментальным полем помогает отпустить накопленное напряжение и вернуть ощущение мягкости, покоя и внутреннего расслабления.</p></div>
+            <div class="healing-item glass"><h4>Нарушения сна</h4><p>Неспокойный сон, бессонница, тревожные ночи — мягкая энергетическая работа помогает настроить более естественный ритм отдыха и тишины.</p></div>
+            <div class="healing-item glass"><h4>Лишний вес и тело</h4><p>Иногда тело бережно хранит то, что душа еще не успела отпустить. Мягкая работа с глубинными установками помогает постепенно освободиться.</p></div>
+            <div class="healing-item glass"><h4>Упадок и уныние</h4><p>Когда мир будто теряет краски, а сил не хватает даже на простые вещи, Ода помогает бережно вернуть внутренний свет, спокойствие и тихую опору внутри.</p></div>
+          </div>
         </div>
       </div>
     </div>
@@ -405,94 +477,104 @@
 </section>
 
 <!-- 04 META -->
-<section class="section on-card">
-  <div class="section-num">04 / Метод</div>
-  <div class="section-content">
-    <div class="meta-body">
-      <div>
-        <h2 class="title">Метаразбор: когда нужен <em>более мягкий путь</em></h2>
-        <p>Метаразбор — это бережная техника глубокой работы с подсознанием и жизненными ситуациями, которая не требует кабинета психолога, но помогает мягко прикоснуться к причинам, которые могут мешать внутренней гармонии.</p>
-        <p>Это для тебя, если:</p>
-        <div class="meta-list">
-          <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты чувствуешь, что <strong>пришло время что-то изменить</strong> — и хочешь спокойно понять, с чего начать</p></div>
-          <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты <strong>переросла прежний этап</strong>, но ещё бережно ищешь своё новое направление</p></div>
-          <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты оказалась в <strong>непростом внутреннем тупике</strong> и хочешь мягко увидеть скрытые причины происходящего</p></div>
-          <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты хочешь работать с <strong>глубинными установками</strong>, но тебе ближе деликатный путь, чем классическая терапия</p></div>
+<section class="section glow-bg on-card">
+  <div class="section-inner">
+    <div class="section-num">04 / Метод</div>
+    <div class="section-content">
+      <div class="meta-body">
+        <div>
+          <h2 class="title">Метаразбор: когда нужен <em>более мягкий путь</em></h2>
+          <p>Метаразбор — это бережная техника глубокой работы с подсознанием и жизненными ситуациями, которая не требует кабинета психолога, но помогает мягко прикоснуться к причинам, которые могут мешать внутренней гармонии.</p>
+          <p>Это для тебя, если:</p>
+          <div class="meta-list">
+            <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты чувствуешь, что <strong>пришло время что-то изменить</strong> — и хочешь спокойно понять, с чего начать</p></div>
+            <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты <strong>переросла прежний этап</strong>, но ещё бережно ищешь своё новое направление</p></div>
+            <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты оказалась в <strong>непростом внутреннем тупике</strong> и хочешь мягко увидеть скрытые причины происходящего</p></div>
+            <div class="meta-list-item glass"><span class="arrow">→</span><p>Ты хочешь работать с <strong>глубинными установками</strong>, но тебе ближе деликатный путь, чем классическая терапия</p></div>
+          </div>
         </div>
+        <div class="meta-img"><picture><source srcset="images/meta-hands.webp" type="image/webp"><img src="images/meta-hands.jpg" alt="Метаразбор — работа с подсознанием и жизненными ситуациями" loading="lazy"></picture></div>
       </div>
-      <div class="meta-img"><img src="images/meta-hands.jpg" alt="Метаразбор"></div>
     </div>
   </div>
 </section>
 
 <!-- 05 ENERGY -->
-<section class="section">
-  <div class="section-num">05 / Очищение</div>
-  <div class="section-content">
-    <h2 class="title">Энергетические блокировки и <em>мягкие очищающие практики</em></h2>
-    <p class="section-desc">Иногда ощущение тяжести — это не то, что принадлежит тебе. Негативные влияния, энергетическое воздействие, чужая тревога и родовые программы могут мягко отражаться в поле и мешать чувствовать спокойствие, гармонию и лёгкость.</p>
-    <img class="energy-img" src="images/meditation.jpg" alt="Практика тишины">
-    <div class="energy-card glass"><h4><span class="ic">🔍</span>Деликатная диагностика поля</h4><p>Ода бережно смотрит, есть ли в твоём пространстве энергетические блокировки — и если они есть, мягко называет их. Спокойно, честно и без давления.</p></div>
-    <div class="energy-card glass"><h4><span class="ic">🕯</span>Мягкие очищающие практики</h4><p>Очищение через свечи, травы, кристаллы и бережные ритуалы. Всё, что не принадлежит тебе, можно отпустить с лёгкостью и в своём темпе.</p></div>
-    <div class="energy-card glass"><h4><span class="ic">🛡</span>Нежная защитная работа</h4><p>После очищения выстраивается мягкая защита. Чтобы пространство оставалось спокойным, а гармония могла возвращаться и сохраняться надолго.</p></div>
+<section class="section glow-bg">
+  <div class="section-inner">
+    <div class="section-num">05 / Очищение</div>
+    <div class="section-content">
+      <h2 class="title">Энергетические блокировки и <em>мягкие очищающие практики</em></h2>
+      <p class="section-desc">Иногда ощущение тяжести — это не то, что принадлежит тебе. Негативные влияния, энергетическое воздействие, чужая тревога и родовые программы могут мягко отражаться в поле и мешать чувствовать спокойствие, гармонию и лёгкость.</p>
+      <picture><source srcset="images/meditation.webp" type="image/webp"><img class="energy-img" src="images/meditation.jpg" alt="Практика тишины и энергетического очищения на рассвете" loading="lazy"></picture>
+      <div class="energy-card glass"><h4><span class="ic">🔍</span>Деликатная диагностика поля</h4><p>Ода бережно смотрит, есть ли в твоём пространстве энергетические блокировки — и если они есть, мягко называет их. Спокойно, честно и без давления.</p></div>
+      <div class="energy-card glass"><h4><span class="ic">🕯</span>Мягкие очищающие практики</h4><p>Очищение через свечи, травы, кристаллы и бережные ритуалы. Всё, что не принадлежит тебе, можно отпустить с лёгкостью и в своём темпе.</p></div>
+      <div class="energy-card glass"><h4><span class="ic">🛡</span>Нежная защитная работа</h4><p>После очищения выстраивается мягкая защита. Чтобы пространство оставалось спокойным, а гармония могла возвращаться и сохраняться надолго.</p></div>
+    </div>
   </div>
 </section>
 
 <!-- 06 CRYSTALS -->
-<section class="section on-card" id="crystals">
-  <div class="section-num">06 / Кристаллы</div>
-  <div class="section-content">
-    <div class="crystals-body">
-      <div class="crystals-media">
-        <img src="images/bracelets-dark.jpg" alt="Браслеты из камней">
-        <img src="images/bracelets-rose.jpg" alt="Браслет розовый кварц">
-      </div>
-      <div>
-        <h2 class="title">Целебные и защитные <em>браслеты из минералов</em></h2>
-        <div class="crystals-text">
-          <p>Каждый камень несёт свою мягкую вибрацию. Аметист помогает успокоить ум, розовый кварц раскрывает сердце, чёрный турмалин бережно поддерживает от энергетических воздействий, цитрин мягко привлекает изобилие.</p>
-          <p>Ода создаёт браслеты не просто как украшение — а как личный инструмент гармонии, защиты и внутреннего исцеления. Каждый браслет собирается под конкретного человека, с учётом его состояния, запроса и энергетического поля.</p>
+<section class="section glow-bg on-card" id="crystals">
+  <div class="section-inner">
+    <div class="section-num">06 / Кристаллы</div>
+    <div class="section-content">
+      <div class="crystals-body">
+        <div class="crystals-media">
+          <picture><source srcset="images/bracelets-dark.webp" type="image/webp"><img src="images/bracelets-dark.jpg" alt="Браслеты из натуральных камней с бусиной дзи" loading="lazy"></picture>
+          <picture><source srcset="images/bracelets-rose.webp" type="image/webp"><img src="images/bracelets-rose.jpg" alt="Браслет из розового кварца на притяжение любви" loading="lazy"></picture>
         </div>
-        <div class="crystals-feature glass"><h4>Подбор минералов</h4><p>Индивидуально под твой запрос и состояние поля</p></div>
-        <div class="crystals-feature glass"><h4>Активация</h4><p>Каждый браслет проходит мягкий ритуал активации перед передачей</p></div>
-        <div class="crystals-feature glass"><h4>Защита и исцеление</h4><p>Деликатно поддерживает как физический, так и энергетический уровень</p></div>
+        <div>
+          <h2 class="title">Целебные и защитные <em>браслеты из минералов</em></h2>
+          <div class="crystals-text">
+            <p>Каждый камень несёт свою мягкую вибрацию. Аметист помогает успокоить ум, розовый кварц раскрывает сердце, чёрный турмалин бережно поддерживает от энергетических воздействий, цитрин мягко привлекает изобилие.</p>
+            <p>Ода создаёт браслеты не просто как украшение — а как личный инструмент гармонии, защиты и внутреннего исцеления. Каждый браслет собирается под конкретного человека, с учётом его состояния, запроса и энергетического поля.</p>
+          </div>
+          <div class="crystals-feature glass"><h4>Подбор минералов</h4><p>Индивидуально под твой запрос и состояние поля</p></div>
+          <div class="crystals-feature glass"><h4>Активация</h4><p>Каждый браслет проходит мягкий ритуал активации перед передачей</p></div>
+          <div class="crystals-feature glass"><h4>Защита и исцеление</h4><p>Деликатно поддерживает как физический, так и энергетический уровень</p></div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- 07 PROCESS -->
-<section class="process">
-  <span class="eyebrow">07 / Как это происходит</span>
-  <h2 class="title">Как проходит <em>работа</em></h2>
-  <p class="section-desc">Мы бережно работаем из тихого пространства, с вниманием и без спешки. Обращайся тогда, когда почувствуешь внутреннюю готовность — не в момент сильного напряжения, а когда внутри тихо подсказывает: пора.</p>
-  <div class="process-grid">
-    <div class="process-step glass"><div class="num">01</div><h4>Запрос</h4><p>Формулируем вопрос и выбираем безопасную глубину работы.</p></div>
-    <div class="process-step glass"><div class="num">02</div><h4>Диагностика</h4><p>Смотрим, где потеряна ясность и что просит внимания первым.</p></div>
-    <div class="process-step glass"><div class="num">03</div><h4>Ритуал</h4><p>Проводим работу: карты, очищение или индивидуальную практику.</p></div>
-    <div class="process-step glass"><div class="num">04</div><h4>Интеграция</h4><p>Закрепляем простые действия, чтобы ясность не осталась только в сессии.</p></div>
+<section class="process glow-bg">
+  <div class="process-inner">
+    <span class="eyebrow">07 / Как это происходит</span>
+    <h2 class="title">Как проходит <em>работа</em></h2>
+    <p class="section-desc">Мы бережно работаем из тихого пространства, с вниманием и без спешки. Обращайся тогда, когда почувствуешь внутреннюю готовность — не в момент сильного напряжения, а когда внутри тихо подсказывает: пора.</p>
+    <div class="process-grid">
+      <div class="process-step glass"><div class="num">01</div><h4>Запрос</h4><p>Формулируем вопрос и выбираем безопасную глубину работы.</p></div>
+      <div class="process-step glass"><div class="num">02</div><h4>Диагностика</h4><p>Смотрим, где потеряна ясность и что просит внимания первым.</p></div>
+      <div class="process-step glass"><div class="num">03</div><h4>Ритуал</h4><p>Проводим работу: карты, очищение или индивидуальную практику.</p></div>
+      <div class="process-step glass"><div class="num">04</div><h4>Интеграция</h4><p>Закрепляем простые действия, чтобы ясность не осталась только в сессии.</p></div>
+    </div>
+    <p class="process-closing">Первый шаг — просто написать. Не нужно подбирать идеальные слова и не нужно заранее всё продумывать. Просто расскажи, что происходит, в своём ритме. Ода ответит бережно и поможет почувствовать, с чего лучше начать.</p>
   </div>
-  <p class="process-closing">Первый шаг — просто написать. Не нужно подбирать идеальные слова и не нужно заранее всё продумывать. Просто расскажи, что происходит, в своём ритме. Ода ответит бережно и поможет почувствовать, с чего лучше начать.</p>
 </section>
 
 <!-- 08 CONTACT CTA -->
-<section class="section on-card">
-  <div class="section-num">08 / Связь</div>
-  <div class="section-content">
-    <div class="contact-cta-body">
-      <div class="cta-media"><div class="frame"><img src="images/fire-bowl.jpg" alt="Ритуальный огонь"></div></div>
-      <div>
-        <h2 class="title">Есть вопросы? <em>Есть сомнения?</em></h2>
-        <div class="cta-quote glass"><p>Мы не обещаем чудес. Мы предлагаем бережное внимание, ясное прочтение и тихую работу по восстановлению того, что вышло из равновесия. Слой за слоем — мы мягко проходим этот путь вместе.</p></div>
-        <p class="section-desc">Напиши по форме — я обязательно отвечу. Мы спокойно подумаем, как я могу помочь тебе. Без давления, без обязательств, без спешки.</p>
-        <div class="cta-cards">
-          <div class="cta-card glass"><h4><span class="ic">✉</span>Написать сообщение</h4><p>Поделись своей ситуацией в свободной и спокойной форме</p></div>
-          <div class="cta-card glass"><h4><span class="ic">🔮</span>Получить ответ</h4><p>Ода прочитает и ответит лично, с вниманием и без шаблонов</p></div>
-          <div class="cta-card glass"><h4><span class="ic">🌿</span>Начать путь</h4><p>Вместе выберем мягкий и подходящий способ работы</p></div>
-        </div>
-        <div class="cta-btns">
-          <a href="https://t.me/ELENA_KOSS24" target="_blank" class="btn btn-solid">Написать Ода</a>
-          <a href="#services" class="btn btn-ghost">Посмотреть услуги</a>
+<section class="section glow-bg on-card">
+  <div class="section-inner">
+    <div class="section-num">08 / Связь</div>
+    <div class="section-content">
+      <div class="contact-cta-body">
+        <div class="cta-media"><div class="frame"><picture><source srcset="images/fire-bowl.webp" type="image/webp"><img src="images/fire-bowl.jpg" alt="Ритуальный огонь для энергетической чистки" loading="lazy"></picture></div></div>
+        <div>
+          <h2 class="title">Есть вопросы? <em>Есть сомнения?</em></h2>
+          <div class="cta-quote glass"><p>Мы не обещаем чудес. Мы предлагаем бережное внимание, ясное прочтение и тихую работу по восстановлению того, что вышло из равновесия. Слой за слоем — мы мягко проходим этот путь вместе.</p></div>
+          <p class="section-desc">Напиши по форме — я обязательно отвечу. Мы спокойно подумаем, как я могу помочь тебе. Без давления, без обязательств, без спешки.</p>
+          <div class="cta-cards">
+            <div class="cta-card glass"><h4><span class="ic">✉</span>Написать сообщение</h4><p>Поделись своей ситуацией в свободной и спокойной форме</p></div>
+            <div class="cta-card glass"><h4><span class="ic">🔮</span>Получить ответ</h4><p>Ода прочитает и ответит лично, с вниманием и без шаблонов</p></div>
+            <div class="cta-card glass"><h4><span class="ic">🌿</span>Начать путь</h4><p>Вместе выберем мягкий и подходящий способ работы</p></div>
+          </div>
+          <div class="cta-btns">
+            <a href="https://t.me/ELENA_KOSS24" target="_blank" class="btn btn-solid">Написать Ода</a>
+            <a href="#services" class="btn btn-ghost">Посмотреть услуги</a>
+          </div>
         </div>
       </div>
     </div>
@@ -500,35 +582,39 @@
 </section>
 
 <!-- 09 TESTIMONIAL -->
-<section class="testimonial">
+<section class="testimonial glow-bg">
   <div class="quote-mark">"</div>
-  <span class="eyebrow">09 / Отзывы</span>
-  <h2 class="title">Тихие истории тех, кто уже<br><em>прошёл этот путь</em></h2>
-  <p class="testimonial-text glass">«Я не думала, что это может быть так деликатно. Но после первой сессии с Ода я впервые за годы уснула спокойно и без лишнего напряжения. Это трудно объяснить словами — это нужно просто почувствовать.»</p>
-  <span class="testimonial-author">— Анонимно</span>
+  <div class="testimonial-inner">
+    <span class="eyebrow">09 / Отзывы</span>
+    <h2 class="title">Тихие истории тех, кто уже<br><em>прошёл этот путь</em></h2>
+    <p class="testimonial-text glass">«Я не думала, что это может быть так деликатно. Но после первой сессии с Ода я впервые за годы уснула спокойно и без лишнего напряжения. Это трудно объяснить словами — это нужно просто почувствовать.»</p>
+    <span class="testimonial-author">— Анонимно</span>
+  </div>
 </section>
 
 <!-- 10 CONTACT -->
-<section class="section on-card" id="contact">
-  <div class="section-num">10 / Запись</div>
-  <div class="section-content">
-    <h2 class="title">Приходи не за обещанием.<br><em>Приходи за ясной следующей дверью.</em></h2>
-    <div class="contact-body">
-      <div>
-        <h3>Начни с простого шага</h3>
-        <p>Оставь контакт и коротко напиши, что сейчас хочется прояснить. Я отвечу лично и предложу формат, который подойдёт твоему состоянию.</p>
-        <div class="contact-meta">
-          <div class="contact-meta-row"><span class="label">Формат</span><span>Онлайн, конфиденциально</span></div>
-          <div class="contact-meta-row"><span class="label">Темп</span><span>Бережный, без спешки</span></div>
-          <div class="contact-meta-row"><span class="label">Ответ</span><span>В течение 24 часов</span></div>
+<section class="section glow-bg on-card" id="contact">
+  <div class="section-inner">
+    <div class="section-num">10 / Запись</div>
+    <div class="section-content">
+      <h2 class="title">Приходи не за обещанием.<br><em>Приходи за ясной следующей дверью.</em></h2>
+      <div class="contact-body">
+        <div>
+          <h3>Начни с простого шага</h3>
+          <p>Оставь контакт и коротко напиши, что сейчас хочется прояснить. Я отвечу лично и предложу формат, который подойдёт твоему состоянию.</p>
+          <div class="contact-meta">
+            <div class="contact-meta-row"><span class="label">Формат</span><span>Онлайн, конфиденциально</span></div>
+            <div class="contact-meta-row"><span class="label">Темп</span><span>Бережный, без спешки</span></div>
+            <div class="contact-meta-row"><span class="label">Ответ</span><span>В течение 24 часов</span></div>
+          </div>
         </div>
+        <form class="contact-form glass" onsubmit="event.preventDefault(); window.open('https://t.me/ELENA_KOSS24','_blank');">
+          <div><label>Имя</label><input type="text" placeholder="Как к тебе обращаться"></div>
+          <div><label>Контакт</label><input type="text" placeholder="Email или Telegram"></div>
+          <div><label>Запрос</label><textarea placeholder="Расскажи, что происходит, в своём ритме..."></textarea></div>
+          <button type="submit" class="btn btn-solid" style="align-self:flex-start;">Отправить сообщение</button>
+        </form>
       </div>
-      <form class="contact-form glass" onsubmit="event.preventDefault(); window.open('https://t.me/ELENA_KOSS24','_blank');">
-        <div><label>Имя</label><input type="text" placeholder="Как к тебе обращаться"></div>
-        <div><label>Контакт</label><input type="text" placeholder="Email или Telegram"></div>
-        <div><label>Запрос</label><textarea placeholder="Расскажи, что происходит, в своём ритме..."></textarea></div>
-        <button type="submit" class="btn btn-solid" style="align-self:flex-start;">Отправить сообщение</button>
-      </form>
     </div>
   </div>
 </section>
@@ -548,6 +634,16 @@
 </div>
 
 <script>
+  // Reading progress bar
+  const progressBar = document.getElementById('reading-progress');
+  const updateProgress = () => {
+    const h = document.documentElement;
+    const scrolled = h.scrollTop / (h.scrollHeight - h.clientHeight) * 100;
+    progressBar.style.width = (scrolled || 0) + '%';
+  };
+  window.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
   // Fade-in on scroll
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((e, i) => {
