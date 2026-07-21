@@ -3,1606 +3,549 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ОДА | Таро • Поле • Метаразбор</title>
+<title>ОДА — Елена · Таро, поле и метаразбор</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@200;300;400&family=Prata&family=Manrope:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,800;0,900;1,400;1,500&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --gold: #d4af5e;
-    --gold-light: #efd598;
-    --cyan: #6cc7f0;
-    /* динамические — управляются скроллом */
-    --bg: #04070f;
-    --ink: #efeaf7;
-    --ink-muted: rgba(239,234,247,0.55);
-    --panel: rgba(255,255,255,0.04);
-    --panel-border: rgba(255,255,255,0.09);
+    color-scheme: light;
+    --bg:     #E9E6DF;   /* фарфоровый тёплый нейтрал */
+    --bg-2:   #E2DFD7;
+    --ink:    #191510;   /* тёплый почти-чёрный */
+    --muted:  #6E665A;   /* тёплый серый */
+    --faint:  #9A9285;
+    --line:   rgba(25,21,16,0.14);
+    --accent: #5B4B66;   /* приглушённый ирис — очень дозированно */
+    --plate-a:#c9c1b2; --plate-b:#a89f8d;
+    --ease: cubic-bezier(.19,1,.22,1);
   }
 
-  html { scroll-behavior: smooth; }
+  html, body { background: var(--bg); }
+  html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
 
   body {
-    background: var(--bg);
     color: var(--ink);
     font-family: 'Manrope', sans-serif;
     font-weight: 300;
+    line-height: 1.6;
     overflow-x: hidden;
   }
+  body.lock { overflow: hidden; height: 100vh; }
 
-  @media (pointer: fine) { body, body a, body button { cursor: none; } }
+  @media (pointer: fine) { * { cursor: none !important; } }
 
-  /* ===== СЛОИ ===== */
-  /* туманность — процедурный космос */
-  #nebula {
-    position: fixed; inset: 0;
-    width: 100%; height: 100%;
-    z-index: 0; pointer-events: none;
-    will-change: transform;
-  }
-  /* тёплое свечение, нарастает к низу страницы (управляется скроллом) */
-  .warm-veil {
-    position: fixed; inset: 0;
-    z-index: 0; pointer-events: none;
-    opacity: var(--warm, 0);
-    background:
-      radial-gradient(ellipse 90% 70% at 50% 120%, rgba(240,190,110,0.5), transparent 60%),
-      linear-gradient(to bottom, transparent 40%, rgba(120,70,30,0.28));
-    mix-blend-mode: screen;
-  }
-  .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
-  .blob {
-    position: absolute;
-    width: 55vmax; height: 55vmax;
-    border-radius: 50%;
-    filter: blur(90px);
-    opacity: var(--blobO, 0.4);
-    mix-blend-mode: screen;
-    will-change: transform;
-  }
-  .blob.b1 { top: -18vmax; left: -12vmax; background: radial-gradient(circle, var(--blob1, #6a3fb0), transparent 65%); animation: drift1 46s ease-in-out infinite alternate; }
-  .blob.b2 { bottom: -22vmax; right: -14vmax; background: radial-gradient(circle, var(--blob2, #8b4fd0), transparent 65%); animation: drift2 38s ease-in-out infinite alternate; }
-  .blob.b3 { top: 30vh; left: 55vw; width: 34vmax; height: 34vmax; background: radial-gradient(circle, var(--blob3, #b06cd8), transparent 65%); opacity: calc(var(--blobO, 0.4) * 0.55); animation: drift1 52s ease-in-out infinite alternate-reverse; }
-  @keyframes drift1 { from { transform: translate(0,0) scale(1); } to { transform: translate(9vmax, 6vmax) scale(1.15); } }
-  @keyframes drift2 { from { transform: translate(0,0) scale(1.1); } to { transform: translate(-8vmax, -5vmax) scale(0.95); } }
+  ::selection { background: var(--ink); color: var(--bg); }
 
-  #scene, #flies { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  #scene { z-index: 1; }
-  #flies { z-index: 2; }
-
-  /* кино-виньетка поверх всего — «плёночный» кадр */
-  .vignette {
-    position: fixed; inset: 0; z-index: 41; pointer-events: none;
-    background:
-      radial-gradient(ellipse 78% 78% at 50% 46%, transparent 55%, rgba(6,2,16,0.55) 100%),
-      linear-gradient(to bottom, rgba(8,3,20,0.35), transparent 18%, transparent 82%, rgba(8,3,20,0.45));
-  }
-
-  /* заставка из бабочек */
-  #intro { position: fixed; inset: 0; z-index: 55; pointer-events: none; }
-  .intro-hint {
-    position: fixed; z-index: 56; left: 50%; bottom: 12%;
-    transform: translateX(-50%);
-    font-size: 0.72rem; letter-spacing: 0.4em; text-transform: uppercase;
-    color: rgba(255,225,160,0.9);
-    text-shadow: 0 2px 20px rgba(0,0,0,0.6);
-    white-space: nowrap; pointer-events: none;
-    animation: hintPulse 2.6s ease-in-out infinite;
-    transition: opacity 0.6s;
-  }
-  body.revealed .intro-hint { opacity: 0; }
-
+  /* тонкая плёночная зернистость */
   .grain {
-    position: fixed; inset: -50%;
-    width: 200%; height: 200%;
-    z-index: 40;
-    pointer-events: none;
-    opacity: 0.05;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    animation: grain 9s steps(10) infinite;
+    position: fixed; inset: -50%; width: 200%; height: 200%;
+    z-index: 3; pointer-events: none; opacity: 0.04; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 8s steps(8) infinite;
   }
-  @keyframes grain {
-    0%,100% { transform: translate(0,0); } 10% { transform: translate(-3%,2%); }
-    20% { transform: translate(2%,-4%); } 30% { transform: translate(-4%,-2%); }
-    40% { transform: translate(3%,3%); } 50% { transform: translate(-2%,4%); }
-    60% { transform: translate(4%,-3%); } 70% { transform: translate(-3%,-4%); }
-    80% { transform: translate(2%,2%); } 90% { transform: translate(-4%,3%); }
-  }
-
-  .content { position: relative; z-index: 3; }
+  @keyframes grain { 0%,100%{transform:translate(0,0)} 20%{transform:translate(-2%,2%)} 40%{transform:translate(2%,-3%)} 60%{transform:translate(-3%,-1%)} 80%{transform:translate(2%,3%)} }
 
   /* ===== КУРСОР ===== */
-  .cursor-dot, .cursor-ring {
-    position: fixed; top: 0; left: 0;
-    z-index: 60; pointer-events: none;
-    border-radius: 50%;
-    display: none;
+  .cursor { position: fixed; top:0; left:0; z-index: 90; pointer-events:none; mix-blend-mode: difference; display:none; }
+  @media (pointer:fine){ .cursor{ display:block; } }
+  .cursor-dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; transform: translate(-50%,-50%); }
+  .cursor-txt {
+    position: fixed; top:0; left:0; z-index:90; pointer-events:none;
+    transform: translate(-50%,-50%) scale(0.6); opacity:0;
+    font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--bg);
+    background: var(--ink); padding: 8px 14px; border-radius: 100px; white-space: nowrap;
+    transition: opacity .35s var(--ease), transform .35s var(--ease);
+    display:none;
   }
-  @media (pointer: fine) { .cursor-dot, .cursor-ring { display: block; } }
-  .cursor-dot { width: 5px; height: 5px; background: var(--gold-light); transform: translate(-50%,-50%); }
-  .cursor-ring {
-    width: 34px; height: 34px;
-    border: 1px solid rgba(212,175,94,0.55);
-    transform: translate(-50%,-50%);
-    transition: width 0.3s, height 0.3s, border-color 0.3s, background 0.3s;
+  @media (pointer:fine){ .cursor-txt{ display:block; } }
+  .cursor-txt.on { opacity:1; transform: translate(-50%,-50%) scale(1); }
+
+  /* ===== ЛОАДЕР ===== */
+  .loader {
+    position: fixed; inset: 0; z-index: 100; background: var(--bg);
+    display: flex; align-items: flex-end; justify-content: space-between;
+    padding: 7vw 6vw; overflow: hidden;
   }
-  .cursor-ring.hover { width: 58px; height: 58px; border-color: rgba(212,175,94,0.9); background: rgba(212,175,94,0.07); }
+  .loader-word {
+    font-family: 'Playfair Display', serif; font-weight: 500;
+    font-size: clamp(3rem, 11vw, 10rem); line-height: 0.9; letter-spacing: -0.01em;
+    overflow: hidden;
+  }
+  .loader-word span { display:inline-block; transform: translateY(110%); }
+  .loader-count { font-size: 0.8rem; letter-spacing: 0.2em; font-variant-numeric: tabular-nums; color: var(--muted); }
+  .loader-bar { position:absolute; left:0; bottom:0; height:2px; width:0; background: var(--ink); }
 
   /* ===== NAV ===== */
   nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    z-index: 50;
-    padding: 26px 48px;
+    position: fixed; top:0; left:0; right:0; z-index: 70;
     display: flex; justify-content: space-between; align-items: center;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    mask-image: linear-gradient(to bottom, black 60%, transparent);
-    -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
+    padding: 26px 6vw; mix-blend-mode: multiply;
   }
+  .brand { font-family:'Playfair Display',serif; font-size:1.35rem; font-weight:600; letter-spacing:.02em; text-decoration:none; color:var(--ink); }
+  .nav-mid { display:flex; gap: 34px; }
+  .nav-mid a, .nav-book {
+    font-size:.66rem; letter-spacing:.24em; text-transform:uppercase; text-decoration:none; color:var(--ink);
+    position:relative;
+  }
+  .nav-mid a::after { content:''; position:absolute; left:0; bottom:-5px; width:100%; height:1px; background:var(--ink); transform:scaleX(0); transform-origin:right; transition:transform .5s var(--ease); }
+  .nav-mid a:hover::after { transform:scaleX(1); transform-origin:left; }
+  .nav-book { border:1px solid var(--ink); border-radius:100px; padding:10px 20px; transition: background .4s var(--ease), color .4s var(--ease); }
+  .nav-book:hover { background:var(--ink); color:var(--bg); }
+  @media (max-width: 860px){ .nav-mid{ display:none; } }
 
-  .nav-logo {
-    font-family: 'Unbounded', sans-serif;
-    font-weight: 300;
-    font-size: 1.05rem;
-    letter-spacing: 0.5em;
-    color: var(--gold-light);
-    text-decoration: none;
+  /* ===== ОБЩЕЕ ===== */
+  main { position: relative; z-index: 2; }
+  section { padding: 0 6vw; position: relative; }
+  .eyebrow {
+    display:flex; align-items:center; gap:14px;
+    font-size:.64rem; letter-spacing:.34em; text-transform:uppercase; color:var(--muted);
+    margin-bottom: 42px;
   }
+  .eyebrow::before { content:''; width:34px; height:1px; background:var(--faint); display:block; }
 
-  .nav-links { display: flex; gap: 38px; list-style: none; }
-  .nav-links a {
-    color: var(--ink-muted);
-    text-decoration: none;
-    font-size: 0.68rem;
-    font-weight: 400;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    transition: color 0.35s;
-    position: relative;
-  }
-  .nav-links a::after {
-    content: '';
-    position: absolute; left: 0; bottom: -6px;
-    width: 100%; height: 1px;
-    background: var(--gold);
-    transform: scaleX(0);
-    transform-origin: right;
-    transition: transform 0.4s cubic-bezier(.16,1,.3,1);
-  }
-  .nav-links a:hover { color: var(--ink); }
-  .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
-
-  .nav-cta {
-    border: 1px solid rgba(212,175,94,0.5);
-    color: var(--gold-light);
-    padding: 11px 30px;
-    font-family: 'Manrope', sans-serif;
-    font-size: 0.64rem;
-    font-weight: 500;
-    letter-spacing: 0.26em;
-    text-transform: uppercase;
-    text-decoration: none;
-    border-radius: 100px;
-    background: rgba(212,175,94,0.06);
-    transition: all 0.4s;
-  }
-  .nav-cta:hover { background: var(--gold); border-color: var(--gold); color: #120e28; box-shadow: 0 8px 34px rgba(212,175,94,0.35); }
-
-  /* ===== ТОЧКИ-ОРБИТА ===== */
-  .orbit-nav {
-    position: fixed; right: 34px; top: 50%;
-    transform: translateY(-50%);
-    z-index: 50;
-    display: flex; flex-direction: column; gap: 20px;
-  }
-  .orbit-dot {
-    display: flex; align-items: center; gap: 14px;
-    flex-direction: row-reverse;
-    background: none; border: none; padding: 0;
-  }
-  .orbit-dot i {
-    width: 8px; height: 8px; border-radius: 50%;
-    border: 1px solid var(--gold);
-    background: transparent;
-    transition: all 0.4s;
-    display: block;
-  }
-  .orbit-dot span {
-    font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase;
-    color: var(--ink-muted);
-    opacity: 0; transform: translateX(8px);
-    transition: all 0.35s;
-  }
-  .orbit-dot:hover span { opacity: 1; transform: translateX(0); }
-  .orbit-dot.active i { background: var(--gold-light); box-shadow: 0 0 16px rgba(212,175,94,0.9); transform: scale(1.35); }
+  /* masked line reveal */
+  .line { overflow: hidden; display: block; }
+  .line > i { display:block; font-style: normal; transform: translateY(115%); transition: transform 1s var(--ease); }
+  .reveal.in .line > i { transform: translateY(0); }
+  .reveal .line:nth-child(2) > i { transition-delay: .08s; }
+  .reveal .line:nth-child(3) > i { transition-delay: .16s; }
+  .reveal .line:nth-child(4) > i { transition-delay: .24s; }
+  .fade-up { opacity:0; transform: translateY(28px); transition: opacity 1s var(--ease), transform 1s var(--ease); }
+  .fade-up.in { opacity:1; transform:none; }
 
   /* ===== HERO ===== */
-  .hero {
-    min-height: 100vh;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center;
-    padding: 0 24px;
-    position: relative;
-  }
-
-  .hero-eyebrow {
-    font-size: 0.62rem;
-    font-weight: 400;
-    letter-spacing: 0.55em;
-    text-transform: uppercase;
-    color: var(--gold);
-    margin-bottom: 34px;
-    opacity: 0;
-    animation: riseIn 1.2s 0.3s cubic-bezier(.16,1,.3,1) forwards;
-  }
-
+  .hero { min-height: 100vh; display: grid; grid-template-columns: 1.35fr 0.65fr; gap: 5vw; align-items: end; padding-top: 20vh; padding-bottom: 8vh; }
+  .hero-eyebrow { font-size:.64rem; letter-spacing:.34em; text-transform:uppercase; color:var(--muted); margin-bottom: 4vh; }
   .hero-title {
-    font-family: 'Unbounded', sans-serif;
-    font-weight: 200;
-    font-size: clamp(3.2rem, 11vw, 8.5rem);
-    line-height: 1.04;
-    letter-spacing: 0.18em;
-    margin-bottom: 30px;
-    color: #f3ead2;
+    font-family:'Playfair Display', serif; font-weight: 500;
+    font-size: clamp(3.4rem, 11.5vw, 12rem); line-height: 0.92; letter-spacing: -0.015em;
   }
-  @keyframes shimmer { to { background-position: -200% 0; } }
+  .hero-title em { font-style: italic; font-weight: 400; }
+  .hero-side { padding-bottom: 1vh; }
+  .hero-portrait { width: 100%; aspect-ratio: 3/4; margin-bottom: 26px; }
+  .hero-lead { font-size: .96rem; line-height: 1.75; color: var(--muted); max-width: 34ch; }
+  .hero-cue { position:absolute; left:6vw; bottom: 4vh; font-size:.6rem; letter-spacing:.3em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:12px; }
+  .hero-cue span { width:1px; height:40px; background:var(--faint); display:block; transform-origin:top; animation: cue 2.4s var(--ease) infinite; }
+  @keyframes cue { 0%{transform:scaleY(0)} 45%{transform:scaleY(1)} 100%{transform:scaleY(0);transform-origin:bottom} }
+  @media (max-width: 860px){ .hero{ grid-template-columns:1fr; gap:8vw; padding-top:26vh; } .hero-side{ order:-1; } .hero-portrait{ aspect-ratio:4/3; } }
 
-  .hero-title .ch {
-    display: inline-block;
-    background: linear-gradient(115deg, #f3ead2 10%, var(--gold-light) 38%, #a8d8f5 72%, #f3ead2 95%);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    opacity: 0;
-    transform: translateY(0.6em) rotate(4deg);
-    animation: chIn 1s cubic-bezier(.16,1,.3,1) forwards, shimmer 9s linear infinite;
-  }
-  @keyframes chIn { to { opacity: 1; transform: none; } }
-
-  .hero-sub {
-    font-family: 'Prata', serif;
-    font-size: clamp(1rem, 2.2vw, 1.3rem);
-    color: var(--ink-muted);
-    max-width: 540px;
-    line-height: 1.75;
-    opacity: 0;
-    animation: riseIn 1.2s 0.9s cubic-bezier(.16,1,.3,1) forwards;
-  }
-
-  @keyframes riseIn { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: translateY(0); } }
-
-  .hero-hint {
-    position: absolute; bottom: 104px; left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.58rem;
-    letter-spacing: 0.34em;
-    text-transform: uppercase;
-    color: var(--gold);
-    white-space: nowrap;
-    opacity: 0;
-    animation: hintPulse 4s 2s ease-in-out infinite;
-  }
-  @keyframes hintPulse { 0%,100% { opacity: 0.3; } 50% { opacity: 0.85; } }
-
-  .scroll-hint {
-    position: absolute; bottom: 36px; left: 50%;
-    width: 1px; height: 48px;
-    background: linear-gradient(to bottom, var(--gold), transparent);
-    animation: drop 2.4s ease-in-out infinite;
-  }
-  @keyframes drop { 0% { transform: translateX(-50%) scaleY(0); transform-origin: top; } 55% { transform: translateX(-50%) scaleY(1); } 100% { transform: translateX(-50%) scaleY(0); transform-origin: bottom; } }
-
-  /* ===== СЕКЦИИ ===== */
-  section { padding: 130px 24px; position: relative; }
-  .inner { max-width: 1080px; margin: 0 auto; }
-
-  .label {
-    font-size: 0.6rem;
-    font-weight: 400;
-    letter-spacing: 0.5em;
-    text-transform: uppercase;
-    color: var(--gold);
-    display: block;
-    margin-bottom: 22px;
-  }
-
-  .title {
-    font-family: 'Prata', serif;
-    font-size: clamp(2rem, 4.6vw, 3.4rem);
-    font-weight: 400;
-    line-height: 1.25;
-    margin-bottom: 28px;
-    color: var(--ink);
-    text-wrap: balance;
-  }
-
-  .glass {
-    background: linear-gradient(var(--panel), var(--panel)) padding-box,
-                linear-gradient(150deg, rgba(212,175,94,0.5), rgba(255,255,255,0.06) 40%, rgba(108,199,240,0.3)) border-box;
-    border: 1px solid transparent;
-    border-radius: 26px;
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    position: relative;
-    overflow: hidden;
-  }
-  .glass::before {
-    content: '';
-    position: absolute; inset: 0;
-    background: radial-gradient(420px circle at var(--mx, 50%) var(--my, -20%), rgba(212,175,94,0.13), transparent 65%);
-    opacity: 0;
-    transition: opacity 0.5s;
-    pointer-events: none;
-  }
-  .glass:hover::before { opacity: 1; }
-
-  /* ABOUT */
-  .about .inner { max-width: 660px; text-align: center; }
-  .about p { font-size: 0.95rem; line-height: 2.1; color: var(--ink-muted); margin-bottom: 18px; }
-  .about p strong { color: var(--gold-light); font-weight: 400; }
-
-  /* SERVICES */
-  .services-head { text-align: center; margin-bottom: 70px; }
-
-  .services-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
-    gap: 24px;
-  }
-
-  .svc {
-    padding: 48px 34px 44px;
-    transition: transform 0.55s cubic-bezier(.16,1,.3,1);
-  }
-  .svc:hover { transform: translateY(-10px); }
-
-  .svc-num {
-    font-family: 'Unbounded', sans-serif;
-    font-weight: 200;
-    font-size: 0.62rem;
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    opacity: 0.75;
-    display: block;
-    margin-bottom: 30px;
-  }
-
-  .svc-glyph { width: 46px; height: 46px; margin-bottom: 26px; color: var(--gold-light); }
-  .svc-glyph svg { width: 100%; height: 100%; }
-
-  .svc h3 {
-    font-family: 'Prata', serif;
-    font-size: 1.45rem;
-    font-weight: 400;
-    color: var(--ink);
-    margin-bottom: 15px;
-  }
-  .svc p { font-size: 0.83rem; line-height: 1.9; color: var(--ink-muted); }
-
-  /* BRACELETS */
-  .bracelets .services-head p { max-width: 480px; margin: 0 auto; font-size: 0.87rem; line-height: 1.95; color: var(--ink-muted); }
-
-  .brace-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 24px; }
-
-  .brace {
-    aspect-ratio: 0.92;
-    border-radius: 26px;
-    overflow: hidden;
-    position: relative;
-    display: flex; align-items: flex-end;
-    padding: 26px;
+  /* ===== ИЗОБРАЖЕНИЯ-ПЛАСТИНЫ (заглушки под фото) ===== */
+  .plate { position: relative; overflow: hidden; background: var(--bg-2); }
+  .plate::before {
+    content:''; position:absolute; inset:0; transform: scale(1.15);
     background:
-      radial-gradient(circle at 32% 26%, rgba(212,175,94,0.28), transparent 58%),
-      radial-gradient(circle at 75% 80%, rgba(167,139,250,0.16), transparent 55%),
-      var(--panel);
-    border: 1px solid var(--panel-border);
-    transition: transform 0.55s cubic-bezier(.16,1,.3,1);
+      radial-gradient(60% 55% at 30% 25%, var(--pa), transparent 70%),
+      radial-gradient(70% 60% at 78% 82%, var(--pb), transparent 72%),
+      linear-gradient(200deg, var(--pc), var(--pd));
   }
-  .brace:hover { transform: translateY(-8px) rotate(-0.6deg); }
-  .brace img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(.16,1,.3,1); }
-  .brace:hover img { transform: scale(1.06); }
-  .brace span {
-    position: relative;
-    font-family: 'Prata', serif;
-    font-size: 1.02rem;
-    color: #f4efe6;
-    text-shadow: 0 2px 16px rgba(10,8,26,0.6);
+  .plate::after {
+    content:''; position:absolute; inset:0; opacity:.5; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
   }
+  .p1 { --pa:#b9a7c4; --pb:#8f8397; --pc:#d8cfc0; --pd:#9b8f9e; }
+  .p2 { --pa:#c8c0ad; --pb:#8b8472; --pc:#ded6c6; --pd:#8f8878; }
+  .p3 { --pa:#c6b7a2; --pb:#9d8163; --pc:#ddd2bf; --pd:#a08a71; }
+  .p4 { --pa:#a9b1b4; --pb:#767f86; --pc:#cdccc6; --pd:#83817e; }
+  .p5 { --pa:#c3aeb4; --pb:#8a6f7a; --pc:#d9ccc9; --pd:#96808a; }
 
-  /* REVIEWS */
-  .rev-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 24px; }
-  .rev { padding: 40px 34px; }
-  .rev-stars { color: var(--gold); font-size: 0.62rem; letter-spacing: 0.3em; margin-bottom: 18px; }
-  .rev p { font-size: 0.85rem; line-height: 1.95; color: var(--ink-muted); margin-bottom: 22px; }
-  .rev cite { font-family: 'Prata', serif; font-style: normal; font-size: 0.95rem; color: var(--gold-light); }
+  /* ===== ABOUT (sticky картинка + едущий текст) ===== */
+  .about { padding-top: 18vh; padding-bottom: 18vh; }
+  .about-grid { display:grid; grid-template-columns: 0.9fr 1.1fr; gap: 6vw; align-items:start; }
+  .about-sticky { position: sticky; top: 14vh; height: 72vh; }
+  .about-sticky .plate { width:100%; height:100%; }
+  .about-title { font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(2rem,4.4vw,3.4rem); line-height:1.12; letter-spacing:-.01em; margin-bottom: 6vh; }
+  .about-body p { font-size: 1.02rem; line-height: 1.95; color: var(--muted); margin-bottom: 1.5em; max-width: 46ch; }
+  .about-body p strong { color: var(--ink); font-weight: 500; }
+  .about-meta { display:flex; gap: 60px; margin-top: 8vh; padding-top: 4vh; border-top: 1px solid var(--line); }
+  .about-meta .n { font-family:'Playfair Display',serif; font-size: 2.4rem; font-weight:500; display:block; }
+  .about-meta .l { font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-top:6px; }
+  @media (max-width: 860px){ .about-grid{ grid-template-columns:1fr; gap:8vw; } .about-sticky{ position:relative; top:0; height:60vh; } }
 
-  /* CONTACT */
-  .contact { text-align: center; padding-bottom: 150px; }
-  .contact .inner { max-width: 580px; }
-  .contact-desc { font-size: 0.9rem; line-height: 1.95; color: var(--ink-muted); margin-bottom: 48px; }
-
-  .contact-btn {
-    display: inline-block;
-    background: linear-gradient(120deg, var(--gold), #e3bf6e 55%, var(--gold));
-    background-size: 200% 100%;
-    color: #171128;
-    padding: 19px 58px;
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    text-decoration: none;
-    border-radius: 100px;
-    transition: all 0.45s;
-    margin-bottom: 38px;
+  /* ===== PRACTICES (editorial-список с картинкой при наведении) ===== */
+  .practices { padding: 14vh 6vw; }
+  .prac-head { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 6vh; }
+  .prac-head h2 { font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(2rem,5vw,4rem); line-height:1; letter-spacing:-.01em; }
+  .prac-list { border-top: 1px solid var(--line); }
+  .prac-row {
+    display:grid; grid-template-columns: 80px 1fr auto; align-items:center; gap: 3vw;
+    padding: 3.4vh 0; border-bottom: 1px solid var(--line);
+    text-decoration:none; color:var(--ink); position: relative;
+    transition: padding-left .6s var(--ease), color .5s var(--ease);
   }
-  .contact-btn:hover { background-position: 100% 0; transform: translateY(-3px); box-shadow: 0 18px 60px rgba(212,175,94,0.4); }
+  .prac-row .num { font-size:.7rem; letter-spacing:.2em; color:var(--faint); font-variant-numeric:tabular-nums; transition: color .5s var(--ease); }
+  .prac-row .name { font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(1.6rem,3.6vw,3rem); line-height:1.05; transition: transform .6s var(--ease); }
+  .prac-row .meta { font-size:.8rem; color:var(--muted); max-width: 30ch; text-align:right; transition: opacity .5s var(--ease); }
+  .prac-row:hover { padding-left: 2vw; }
+  .prac-row:hover .num { color: var(--accent); }
+  .prac-row:hover .name { transform: translateX(10px); }
+  @media (hover:hover){ .prac-list:hover .prac-row:not(:hover) .name { opacity:.35; } }
+  @media (max-width: 700px){ .prac-row{ grid-template-columns: 44px 1fr; } .prac-row .meta{ display:none; } }
 
-  .contact-social { display: flex; justify-content: center; gap: 30px; }
-  .contact-social a {
-    font-size: 0.64rem;
-    letter-spacing: 0.24em;
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    text-decoration: none;
-    transition: color 0.35s;
+  /* плавающая картинка практики за курсором */
+  .prac-float {
+    position: fixed; top:0; left:0; z-index: 60; width: 24vw; max-width: 340px; aspect-ratio: 4/5;
+    pointer-events:none; opacity:0; transform: translate(-50%,-50%) scale(.85);
+    transition: opacity .5s var(--ease), transform .6s var(--ease);
+    will-change: transform;
   }
-  .contact-social a:hover { color: var(--gold); }
+  .prac-float.on { opacity:1; transform: translate(-50%,-50%) scale(1); }
+  .prac-float .plate { width:100%; height:100%; }
+  @media (max-width: 860px){ .prac-float{ display:none; } }
 
-  footer {
-    position: relative; z-index: 3;
-    padding: 30px 48px;
-    display: flex; justify-content: space-between;
-    border-top: 1px solid var(--panel-border);
-  }
-  footer p { font-size: 0.64rem; color: var(--ink-muted); letter-spacing: 0.16em; }
+  /* ===== AMULETS ===== */
+  .amulets { padding: 14vh 6vw; }
+  .am-intro { max-width: 52ch; margin-bottom: 8vh; }
+  .am-intro h2 { font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(2rem,5vw,4rem); line-height:1.02; margin-bottom: 3vh; letter-spacing:-.01em; }
+  .am-intro p { color: var(--muted); font-size:1rem; line-height:1.8; }
+  .am-grid { display:grid; grid-template-columns: repeat(12, 1fr); gap: 2vw; }
+  .am-item { text-decoration:none; color:var(--ink); }
+  .am-item .plate { width:100%; margin-bottom: 18px; transition: transform .8s var(--ease); }
+  .am-item:hover .plate { transform: scale(.98); }
+  .am-item .cap { display:flex; justify-content:space-between; align-items:baseline; border-top:1px solid var(--line); padding-top:12px; }
+  .am-item .cap .t { font-family:'Playfair Display',serif; font-size:1.1rem; }
+  .am-item .cap .i { font-size:.66rem; letter-spacing:.16em; color:var(--faint); }
+  .am-a{ grid-column: span 7; } .am-a .plate{ aspect-ratio:4/3; }
+  .am-b{ grid-column: span 5; margin-top: 12vh; } .am-b .plate{ aspect-ratio:3/4; }
+  .am-c{ grid-column: span 5; } .am-c .plate{ aspect-ratio:3/4; }
+  .am-d{ grid-column: span 7; margin-top: 6vh; } .am-d .plate{ aspect-ratio:4/3; }
+  @media (max-width:700px){ .am-grid{ grid-template-columns:1fr; gap:8vw; } .am-a,.am-b,.am-c,.am-d{ grid-column:auto; margin-top:0; } .am-a .plate,.am-d .plate{ aspect-ratio:4/3; } }
 
-  /* ===== ПОЯВЛЕНИЕ ===== */
-  .fade {
-    opacity: 0;
-    transform: translateY(46px);
-    filter: blur(10px);
-    transition: opacity 1.1s cubic-bezier(.16,1,.3,1), transform 1.1s cubic-bezier(.16,1,.3,1), filter 1.1s cubic-bezier(.16,1,.3,1);
+  /* ===== REVIEWS ===== */
+  .reviews { padding: 16vh 6vw; }
+  .rev-wrap { max-width: 20ch; margin: 0 auto 10vh; text-align:center; }
+  .rev-list { max-width: 900px; margin: 0 auto; }
+  .rev-item { padding: 7vh 0; border-top: 1px solid var(--line); display:grid; grid-template-columns: 0.4fr 1fr; gap: 4vw; }
+  .rev-item:last-child { border-bottom: 1px solid var(--line); }
+  .rev-item .who { font-size:.72rem; letter-spacing:.18em; text-transform:uppercase; color:var(--muted); }
+  .rev-item blockquote { font-family:'Playfair Display',serif; font-weight:400; font-size:clamp(1.3rem,2.4vw,1.9rem); line-height:1.45; }
+  .rev-item blockquote em { font-style:italic; color: var(--accent); }
+  @media (max-width:700px){ .rev-item{ grid-template-columns:1fr; gap:2vh; } }
+
+  /* ===== CONTACT ===== */
+  .contact { padding: 16vh 6vw 8vh; text-align:center; }
+  .contact .eyebrow { justify-content:center; }
+  .contact h2 { font-family:'Playfair Display',serif; font-weight:500; font-size:clamp(3rem,11vw,11rem); line-height:.92; letter-spacing:-.02em; margin-bottom: 5vh; }
+  .contact h2 em { font-style:italic; font-weight:400; }
+  .contact-link {
+    display:inline-block; font-size:.8rem; letter-spacing:.24em; text-transform:uppercase; text-decoration:none;
+    color:var(--ink); border:1px solid var(--ink); border-radius:100px; padding: 18px 44px;
+    transition: background .4s var(--ease), color .4s var(--ease);
   }
-  .fade.in { opacity: 1; transform: translateY(0); filter: blur(0); }
+  .contact-link:hover { background: var(--ink); color: var(--bg); }
+  .contact-social { display:flex; justify-content:center; gap: 40px; margin-top: 6vh; }
+  .contact-social a { font-size:.66rem; letter-spacing:.2em; text-transform:uppercase; text-decoration:none; color:var(--muted); }
+  .contact-social a:hover { color: var(--ink); }
+
+  footer { padding: 5vh 6vw; display:flex; justify-content:space-between; border-top:1px solid var(--line); font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); }
+  @media (max-width:700px){ footer{ flex-direction:column; gap:10px; text-align:center; } }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    .fade { opacity: 1; transform: none; filter: none; }
-    .hero-title .ch { opacity: 1; transform: none; filter: none; }
-    .hero-eyebrow, .hero-sub { opacity: 1; }
-  }
-
-  /* MOBILE */
-  @media (max-width: 768px) {
-    nav { padding: 18px 22px; }
-    .nav-links { display: none; }
-    .orbit-nav { right: 16px; gap: 16px; }
-    section { padding: 80px 20px; }
-    .hero-hint { bottom: 88px; }
-    footer { flex-direction: column; gap: 10px; text-align: center; }
+    *, *::before, *::after { animation-duration:.01ms!important; transition-duration:.01ms!important; }
+    .line > i, .loader-word span { transform:none!important; }
+    .fade-up { opacity:1; transform:none; }
   }
 </style>
 </head>
-<body>
+<body class="lock">
 
-<canvas id="nebula"></canvas>
-<div class="aurora"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
-<div class="warm-veil"></div>
-<canvas id="scene"></canvas>
-<div class="vignette"></div>
-<canvas id="flies"></canvas>
-<canvas id="intro"></canvas>
-<div class="intro-hint" id="introHint">✦ двигай мышкой ✦</div>
 <div class="grain"></div>
-<div class="cursor-ring" id="curRing"></div>
-<div class="cursor-dot" id="curDot"></div>
+<div class="cursor cursor-dot" id="cur"></div>
+<div class="cursor-txt" id="curTxt">смотреть</div>
 
+<!-- ЛОАДЕР -->
+<div class="loader" id="loader">
+  <div class="loader-word"><span id="loadWord">ОДА</span></div>
+  <div class="loader-count" id="loadCount">00</div>
+  <div class="loader-bar" id="loadBar"></div>
+</div>
+
+<!-- NAV -->
 <nav>
-  <a href="#" class="nav-logo">ОДА</a>
-  <ul class="nav-links">
-    <li><a href="#about">Обо мне</a></li>
-    <li><a href="#services">Практики</a></li>
-    <li><a href="#bracelets">Амулеты</a></li>
-    <li><a href="#reviews">Отзывы</a></li>
-  </ul>
-  <a href="https://t.me/ELENA_KOSS24" target="_blank" class="nav-cta">Записаться</a>
+  <a href="#top" class="brand" data-link>ОДА</a>
+  <div class="nav-mid">
+    <a href="#about" data-link>Обо мне</a>
+    <a href="#practices" data-link>Практики</a>
+    <a href="#amulets" data-link>Амулеты</a>
+    <a href="#reviews" data-link>Отзывы</a>
+  </div>
+  <a href="https://t.me/ELENA_KOSS24" target="_blank" class="nav-book" data-cursor="написать">Записаться</a>
 </nav>
 
-<div class="orbit-nav" id="orbitNav">
-  <button class="orbit-dot active" data-state="0"><span>Таро</span><i></i></button>
-  <button class="orbit-dot" data-state="1"><span>Поле</span><i></i></button>
-  <button class="orbit-dot" data-state="2"><span>Метаразбор</span><i></i></button>
-  <button class="orbit-dot" data-state="3"><span>Чистки</span><i></i></button>
-</div>
+<main id="top">
 
-<div class="content">
-
+  <!-- HERO -->
   <section class="hero">
-    <p class="hero-eyebrow">Таро · Поле · Метаразбор · Чистки</p>
-    <h1 class="hero-title" id="heroTitle">ОДА</h1>
-    <p class="hero-sub">Елена — мастер работы с полем и тонкими энергиями. Помогаю увидеть настоящие причины происходящего — и путь к себе.</p>
-    <p class="hero-hint">✦ нажми на сферу — она покажет практики ✦</p>
-    <div class="scroll-hint"></div>
+    <div class="hero-main reveal">
+      <div class="hero-eyebrow line"><i>Таро · Поле · Метаразбор · Чистки</i></div>
+      <h1 class="hero-title">
+        <span class="line"><i>Вижу</i></span>
+        <span class="line"><i>сквозь</i></span>
+        <span class="line"><i><em>поле</em></i></span>
+      </h1>
+    </div>
+    <div class="hero-side fade-up">
+      <div class="hero-portrait plate p5" data-parallax="0.12"></div>
+      <p class="hero-lead">Елена — практик работы с полем и тонкими энергиями. Помогаю увидеть настоящие причины происходящего и найти путь к себе.</p>
+    </div>
+    <div class="hero-cue"><span></span>листайте</div>
   </section>
 
+  <!-- ABOUT -->
   <section class="about" id="about">
-    <div class="inner fade">
-      <span class="label">Обо мне</span>
-      <h2 class="title">Путь к себе начинается здесь</h2>
-      <p>Меня зовут <strong>Елена</strong>. Я — практик работы с полем, таролог и мастер метаразбора жизненных ситуаций.</p>
-      <p>Мой подход соединяет <strong>считывание энергетического поля</strong>, таро и глубинный анализ — чтобы вы увидели не симптомы, а причины.</p>
-      <p>Работаю онлайн по всему миру. Каждая сессия — <strong>пространство честного разговора</strong> с собой и своей судьбой.</p>
-    </div>
-  </section>
-
-  <section class="services" id="services">
-    <div class="inner">
-      <div class="services-head fade">
-        <span class="label">Практики</span>
-        <h2 class="title">Четыре грани сферы</h2>
+    <div class="about-grid">
+      <div class="about-sticky">
+        <div class="plate p3" data-parallax="0.06"></div>
       </div>
-      <div class="services-grid">
-        <div class="svc glass fade" id="svc-0" data-state="0">
-          <span class="svc-num">I</span>
-          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 L37 24 L24 42 L11 24 Z"/><path d="M24 14 L31.5 24 L24 34 L16.5 24 Z" opacity="0.55"/><circle cx="24" cy="24" r="2" opacity="0.8"/></svg></div>
-          <h3>Таро</h3>
-          <p>Расклады на живые вопросы — отношения, работа, деньги, здоровье. Честный ответ без прикрас.</p>
+      <div class="about-text">
+        <p class="eyebrow">Обо мне</p>
+        <h2 class="about-title reveal">
+          <span class="line"><i>Каждая сессия — честный</i></span>
+          <span class="line"><i>разговор с собой</i></span>
+          <span class="line"><i>и своей судьбой.</i></span>
+        </h2>
+        <div class="about-body">
+          <p class="fade-up">Меня зовут <strong>Елена</strong>. Я — таролог и мастер метаразбора жизненных ситуаций. Мой подход соединяет считывание энергетического поля, работу с таро и глубинный анализ — чтобы вы увидели не симптомы, а настоящие причины.</p>
+          <p class="fade-up">Работаю онлайн с людьми по всему миру. Помогаю распутать то, что давно тянет назад, и вернуть себе ясность и опору.</p>
         </div>
-        <div class="svc glass fade" id="svc-1" data-state="1">
-          <span class="svc-num">II</span>
-          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><circle cx="24" cy="24" r="6"/><ellipse cx="24" cy="24" rx="16" ry="7" opacity="0.55"/><ellipse cx="24" cy="24" rx="16" ry="7" transform="rotate(60 24 24)" opacity="0.4"/><ellipse cx="24" cy="24" rx="16" ry="7" transform="rotate(-60 24 24)" opacity="0.4"/></svg></div>
-          <h3>Работа через поле</h3>
-          <p>Считывание вашего поля, выявление блоков и искажений, которые мешают жить в полную силу.</p>
-        </div>
-        <div class="svc glass fade" id="svc-2" data-state="2">
-          <span class="svc-num">III</span>
-          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"><path d="M24 22 C20 12, 8 10, 5 15 C8 24, 17 27, 24 24 Z" opacity="0.9"/><path d="M24 22 C28 12, 40 10, 43 15 C40 24, 31 27, 24 24 Z" opacity="0.55"/><path d="M24 24 v12" /><path d="M22 40 c1-2 3-2 4 0" opacity="0.7"/></svg></div>
-          <h3>Метаразбор</h3>
-          <p>Глубинный разбор ситуации через поле. Скрытые причины становятся видимыми — и появляется выход.</p>
-        </div>
-        <div class="svc glass fade" id="svc-3" data-state="3">
-          <span class="svc-num">IV</span>
-          <div class="svc-glyph"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M10 12 h28" opacity="0.9"/><path d="M14 19 h22" opacity="0.7"/><path d="M18 26 h15" opacity="0.55"/><path d="M21 33 h9" opacity="0.4"/><path d="M23.5 40 h4" opacity="0.3"/></svg></div>
-          <h3>Чистки</h3>
-          <p>Энергетические чистки человека и пространства. Снятие негативных программ, возврат баланса.</p>
+        <div class="about-meta fade-up">
+          <div><span class="n">7</span><span class="l">лет практики</span></div>
+          <div><span class="n">500+</span><span class="l">разборов</span></div>
+          <div><span class="n">∞</span><span class="l">онлайн, весь мир</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="bracelets" id="bracelets">
-    <div class="inner">
-      <div class="services-head fade">
-        <span class="label">Авторские изделия</span>
-        <h2 class="title">Амулеты из природных камней</h2>
-        <p>Каждый браслет создаётся индивидуально — под ваш запрос и энергетику. Камни подбираются интуитивно.</p>
-      </div>
-      <div class="brace-grid">
-        <div class="brace fade"><img src="images/bracelet1.jpg" alt="" onerror="this.remove()"><span>Аметист и горный хрусталь</span></div>
-        <div class="brace fade"><img src="images/bracelet2.jpg" alt="" onerror="this.remove()"><span>Камни силы</span></div>
-        <div class="brace fade"><img src="images/bracelet3.jpg" alt="" onerror="this.remove()"><span>С бусиной Дзи</span></div>
-        <div class="brace fade"><img src="images/bracelet4.jpg" alt="" onerror="this.remove()"><span>На притяжение любви</span></div>
-      </div>
+  <!-- PRACTICES -->
+  <section class="practices" id="practices">
+    <div class="prac-head">
+      <h2 class="reveal"><span class="line"><i>Практики</i></span></h2>
+      <p class="eyebrow" style="margin:0">Четыре направления</p>
+    </div>
+    <div class="prac-list" id="pracList">
+      <a class="prac-row" href="https://t.me/ELENA_KOSS24" target="_blank" data-plate="p1" data-cursor="записаться">
+        <span class="num">01</span>
+        <span class="name">Таро</span>
+        <span class="meta">Расклады на живые вопросы — отношения, работа, деньги, здоровье. Честный ответ без прикрас.</span>
+      </a>
+      <a class="prac-row" href="https://t.me/ELENA_KOSS24" target="_blank" data-plate="p2" data-cursor="записаться">
+        <span class="num">02</span>
+        <span class="name">Работа через поле</span>
+        <span class="meta">Считывание вашего поля, выявление блоков и искажений, которые мешают жить в полную силу.</span>
+      </a>
+      <a class="prac-row" href="https://t.me/ELENA_KOSS24" target="_blank" data-plate="p3" data-cursor="записаться">
+        <span class="num">03</span>
+        <span class="name">Метаразбор</span>
+        <span class="meta">Глубинный разбор ситуации через поле. Скрытые причины становятся видимыми — и появляется выход.</span>
+      </a>
+      <a class="prac-row" href="https://t.me/ELENA_KOSS24" target="_blank" data-plate="p4" data-cursor="записаться">
+        <span class="num">04</span>
+        <span class="name">Чистки</span>
+        <span class="meta">Энергетические чистки человека и пространства. Снятие негативных программ, возврат баланса.</span>
+      </a>
     </div>
   </section>
 
+  <!-- AMULETS -->
+  <section class="amulets" id="amulets">
+    <div class="am-intro">
+      <p class="eyebrow">Авторские изделия</p>
+      <h2 class="reveal"><span class="line"><i>Амулеты из</i></span><span class="line"><i>природных камней</i></span></h2>
+      <p class="fade-up">Каждый браслет создаётся индивидуально — под ваш запрос и энергетику. Камни подбираются интуитивно.</p>
+    </div>
+    <div class="am-grid">
+      <a class="am-item am-a" href="https://t.me/ELENA_KOSS24" target="_blank" data-cursor="смотреть">
+        <div class="plate p1" data-parallax="0.05"></div>
+        <div class="cap"><span class="t">Аметист и горный хрусталь</span><span class="i">01</span></div>
+      </a>
+      <a class="am-item am-b" href="https://t.me/ELENA_KOSS24" target="_blank" data-cursor="смотреть">
+        <div class="plate p3" data-parallax="0.08"></div>
+        <div class="cap"><span class="t">Камни силы</span><span class="i">02</span></div>
+      </a>
+      <a class="am-item am-c" href="https://t.me/ELENA_KOSS24" target="_blank" data-cursor="смотреть">
+        <div class="plate p5" data-parallax="0.08"></div>
+        <div class="cap"><span class="t">С бусиной Дзи</span><span class="i">03</span></div>
+      </a>
+      <a class="am-item am-d" href="https://t.me/ELENA_KOSS24" target="_blank" data-cursor="смотреть">
+        <div class="plate p4" data-parallax="0.05"></div>
+        <div class="cap"><span class="t">На притяжение любви</span><span class="i">04</span></div>
+      </a>
+    </div>
+  </section>
+
+  <!-- REVIEWS -->
   <section class="reviews" id="reviews">
-    <div class="inner">
-      <div class="services-head fade">
-        <span class="label">Говорят клиенты</span>
-        <h2 class="title">Отзывы</h2>
+    <p class="eyebrow rev-wrap" style="justify-content:center">Говорят клиенты</p>
+    <div class="rev-list">
+      <div class="rev-item fade-up">
+        <div class="who">Виктория</div>
+        <blockquote>Именно после начала работы с вами у меня <em>появилась энергия</em>. Наладился сон, ушли головные боли, всё само собой стало складываться.</blockquote>
       </div>
-      <div class="rev-grid">
-        <div class="rev glass fade">
-          <div class="rev-stars">★ ★ ★ ★ ★</div>
-          <p>Именно после начала работы с вами у меня появилась энергия! Наладился сон, головные боли ушли, появились силы на спорт и работу. Всё само собой стало складываться.</p>
-          <cite>— Виктория</cite>
-        </div>
-        <div class="rev glass fade">
-          <div class="rev-stars">★ ★ ★ ★ ★</div>
-          <p>Я очень скептически отношусь к такому, но вы меня быстро переубедили. Всё, что разложили, было правдой — в точку. Вы рассказали то, от чего я сама убегала. Теперь я знаю, что делать.</p>
-          <cite>— Без имени (по просьбе)</cite>
-        </div>
-        <div class="rev glass fade">
-          <div class="rev-stars">★ ★ ★ ★ ★</div>
-          <p>Мне нечего добавить и исправить — все 100% про меня. Действительно многое держу в себе, многое скрываю, потому что предавали. Всё так, как вы сказали. Благодарю.</p>
-          <cite>— Кристина</cite>
-        </div>
-        <div class="rev glass fade">
-          <div class="rev-stars">★ ★ ★ ★ ★</div>
-          <p>Муж говорит — состояние расслабленности, как после бани. А главное: у него полностью спал отёк с ноги, который был 24/7. И боли нет совсем! Благодарю миллион раз!</p>
-          <cite>— Юлия, Казахстан</cite>
-        </div>
-        <div class="rev glass fade">
-          <div class="rev-stars">★ ★ ★ ★ ★</div>
-          <p>Понравилось, даже более чем! Аж плакать захотелось. Всё в точку — всё, что сейчас происходит в жизни, всё увидела. Спасибо, молодец!</p>
-          <cite>— Ира</cite>
-        </div>
+      <div class="rev-item fade-up">
+        <div class="who">Без имени, по просьбе</div>
+        <blockquote>Я очень скептически отношусь к такому, но вы меня быстро переубедили. Всё, что разложили, было <em>правдой — в точку</em>. Теперь я знаю, что делать.</blockquote>
+      </div>
+      <div class="rev-item fade-up">
+        <div class="who">Кристина</div>
+        <blockquote>Мне нечего добавить и исправить — <em>всё сто процентов про меня</em>. Всё так, как вы сказали. Благодарю.</blockquote>
+      </div>
+      <div class="rev-item fade-up">
+        <div class="who">Юлия · Казахстан</div>
+        <blockquote>Состояние расслабленности, как после бани. А главное — у мужа <em>полностью спал отёк</em>, который был всегда. И боли нет совсем.</blockquote>
       </div>
     </div>
   </section>
 
+  <!-- CONTACT -->
   <section class="contact" id="contact">
-    <div class="inner fade">
-      <span class="label">Готовы начать?</span>
-      <h2 class="title">Запишитесь на консультацию</h2>
-      <p class="contact-desc">Напишите мне в Telegram — обсудим ваш запрос и подберём форму работы.</p>
-      <a href="https://t.me/ELENA_KOSS24" target="_blank" class="contact-btn">Написать в Telegram</a>
-      <div class="contact-social">
-        <a href="https://instagram.com/oda_of_magic" target="_blank">Instagram</a>
-        <a href="https://t.me/oda_of_magic" target="_blank">Telegram-канал</a>
-      </div>
+    <p class="eyebrow">Готовы начать?</p>
+    <h2 class="reveal"><span class="line"><i>Запишитесь</i></span><span class="line"><i>на <em>разбор</em></i></span></h2>
+    <a href="https://t.me/ELENA_KOSS24" target="_blank" class="contact-link" data-cursor="telegram">Написать в Telegram</a>
+    <div class="contact-social">
+      <a href="https://instagram.com/oda_of_magic" target="_blank" data-cursor="открыть">Instagram</a>
+      <a href="https://t.me/oda_of_magic" target="_blank" data-cursor="открыть">Telegram-канал</a>
     </div>
   </section>
 
-</div>
+  <footer>
+    <span>© 2024 ОДА · Елена</span>
+    <span>Таро · Поле · Метаразбор · Чистки</span>
+  </footer>
 
-<footer>
-  <p>© 2024 ОДА · Елена</p>
-  <p>Таро · Поле · Метаразбор · Чистки</p>
-</footer>
+</main>
 
-<script type="importmap">
-{ "imports": { "three": "./vendor/three.module.js" } }
-</script>
+<div class="prac-float" id="pracFloat"><div class="plate" id="pracFloatPlate"></div></div>
 
-<script type="module">
-import * as THREE from 'three';
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lerp = (a,b,t) => a + (b-a)*t;
+  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
-const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ============ ПРОЦЕДУРНАЯ ТУМАННОСТЬ (фиолетовый космос) ============ */
-const nebCanvas = document.getElementById('nebula');
-const nebCtx = nebCanvas.getContext('2d');
-
-function valNoise2D(seed) {
-  const P = new Uint8Array(512);
-  const perm = [...Array(256).keys()];
-  let s = seed >>> 0;
-  const rnd = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
-  for (let i = 255; i > 0; i--) { const j = (rnd() * (i + 1)) | 0; [perm[i], perm[j]] = [perm[j], perm[i]]; }
-  for (let i = 0; i < 512; i++) P[i] = perm[i & 255];
-  const fade = (t) => t * t * (3 - 2 * t);
-  const lin = (a, b, t) => a + (b - a) * t;
-  const grad = (h) => (h / 255) * 2 - 1;
-  return (x, y) => {
-    const xi = Math.floor(x) & 255, yi = Math.floor(y) & 255;
-    const xf = x - Math.floor(x), yf = y - Math.floor(y);
-    const u = fade(xf), v = fade(yf);
-    const aa = P[P[xi] + yi], ab = P[P[xi] + yi + 1];
-    const ba = P[P[xi + 1] + yi], bb = P[P[xi + 1] + yi + 1];
-    return lin(lin(grad(aa), grad(ba), u), lin(grad(ab), grad(bb), u), v) * 0.5 + 0.5;
-  };
-}
-const nz1 = valNoise2D(1337), nz2 = valNoise2D(90210), nz3 = valNoise2D(4242);
-function fbm(nz, x, y, oct) {
-  let v = 0, amp = 0.5, f = 1;
-  for (let i = 0; i < oct; i++) { v += amp * nz(x * f, y * f); f *= 2; amp *= 0.5; }
-  return v;
-}
-
-function drawNebula() {
-  const W = innerWidth, H = innerHeight, dpr = Math.min(devicePixelRatio, 2);
-  nebCanvas.width = W * dpr; nebCanvas.height = H * dpr;
-  nebCanvas.style.width = W + 'px'; nebCanvas.style.height = H + 'px';
-
-  /* облака рисуем в маленьком буфере и растягиваем — мягко и быстро */
-  const bw = 300, bh = Math.round(bw * H / W);
-  const buf = document.createElement('canvas'); buf.width = bw; buf.height = bh;
-  const bctx = buf.getContext('2d');
-  const img = bctx.createImageData(bw, bh);
-  const d = img.data;
-  /* палитра туманности: глубокий фиолет -> пурпур -> лавандово-белое ядро */
-  const stops = [
-    [0.00, [16, 8, 34]],
-    [0.35, [58, 22, 96]],
-    [0.60, [124, 58, 168]],
-    [0.80, [180, 120, 214]],
-    [1.00, [236, 220, 250]],
-  ];
-  const ramp = (t) => {
-    for (let i = 1; i < stops.length; i++) if (t <= stops[i][0]) {
-      const k = (t - stops[i-1][0]) / (stops[i][0] - stops[i-1][0]);
-      return stops[i-1][1].map((c, j) => c + (stops[i][1][j] - c) * k);
-    }
-    return stops[stops.length - 1][1];
-  };
-  const sc = 2.6;
-  for (let y = 0; y < bh; y++) {
-    for (let x = 0; x < bw; x++) {
-      const nx = x / bw * sc, ny = y / bh * sc;
-      /* доменное искажение — рваные волокна как на фото */
-      const wx = fbm(nz2, nx + 3.1, ny + 1.7, 4) * 0.9;
-      const wy = fbm(nz3, nx - 2.3, ny + 4.2, 4) * 0.9;
-      let dens = fbm(nz1, nx + wx, ny + wy, 5);
-      /* диагональная светящаяся полоса ядра */
-      const band = 1 - Math.min(1, Math.abs((y / bh) - (x / bw) * 0.55 - 0.15) * 2.4);
-      dens = dens * 0.72 + Math.max(0, band) * 0.42;
-      dens = Math.pow(Math.min(1, dens), 1.5);
-      const col = ramp(dens);
-      const idx = (y * bw + x) * 4;
-      d[idx] = col[0]; d[idx+1] = col[1]; d[idx+2] = col[2]; d[idx+3] = 255;
-    }
+  /* ===== ЛОАДЕР ===== */
+  const loader = document.getElementById('loader');
+  const loadCount = document.getElementById('loadCount');
+  const loadBar = document.getElementById('loadBar');
+  const loadWord = document.getElementById('loadWord');
+  let p = 0;
+  function startReveal() {
+    document.body.classList.remove('lock');
+    document.querySelectorAll('.reveal').forEach((el, i) => {
+      const r = el.getBoundingClientRect();
+      if (r.top < innerHeight * 0.95) setTimeout(() => el.classList.add('in'), 60 + i*40);
+    });
+    // hero side + первые fade-up
+    document.querySelectorAll('.hero-side, .hero .fade-up').forEach((el,i)=> setTimeout(()=>el.classList.add('in'), 260 + i*90));
   }
-  bctx.putImageData(img, 0, 0);
-
-  nebCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  nebCtx.imageSmoothingEnabled = true;
-  nebCtx.clearRect(0, 0, W, H);
-  nebCtx.drawImage(buf, 0, 0, W, H);
-
-  /* звёзды (рисуем один раз поверх облаков) */
-  const starN = Math.round(W * H / 4200);
-  for (let i = 0; i < starN; i++) {
-    const x = Math.random() * W, y = Math.random() * H;
-    const r = Math.random() * 1.3 + 0.2, b = Math.random() * 0.6 + 0.4;
-    const flare = Math.random() < 0.045;
-    nebCtx.globalAlpha = b;
-    nebCtx.fillStyle = '#fff';
-    nebCtx.beginPath(); nebCtx.arc(x, y, r, 0, Math.PI * 2); nebCtx.fill();
-    if (flare) {
-      nebCtx.globalAlpha = b * 0.55;
-      nebCtx.strokeStyle = '#e2e6ff'; nebCtx.lineWidth = 0.6;
-      const f = r * 7;
-      nebCtx.beginPath();
-      nebCtx.moveTo(x - f, y); nebCtx.lineTo(x + f, y);
-      nebCtx.moveTo(x, y - f); nebCtx.lineTo(x, y + f);
-      nebCtx.stroke();
-    }
+  function finishLoad() {
+    loadWord.style.transition = 'transform .8s cubic-bezier(.19,1,.22,1)';
+    loadWord.style.transform = 'translateY(-115%)';
+    loader.style.transition = 'transform .9s cubic-bezier(.76,0,.24,1)';
+    loader.style.transform = 'translateY(-100%)';
+    setTimeout(() => { loader.style.display = 'none'; }, 950);
+    startReveal();
   }
-  nebCtx.globalAlpha = 1;
-}
-addEventListener('resize', drawNebula);
-drawNebula();
+  requestAnimationFrame(() => { loadWord.querySelector ? null : 0; loadWord.style.transition='transform .7s cubic-bezier(.19,1,.22,1)'; loadWord.style.transform='translateY(0)'; });
+  loadWord.style.display='inline-block'; loadWord.style.transform='translateY(110%)';
+  const li = setInterval(() => {
+    p += Math.random()*16 + 6;
+    if (p >= 100) { p = 100; clearInterval(li); setTimeout(finishLoad, 350); }
+    loadCount.textContent = String(Math.floor(p)).padStart(2,'0');
+    loadBar.style.width = p + '%';
+  }, 130);
+  if (reduce) { clearInterval(li); loader.style.display='none'; document.body.classList.remove('lock'); document.querySelectorAll('.reveal').forEach(e=>e.classList.add('in')); document.querySelectorAll('.fade-up').forEach(e=>e.classList.add('in')); }
 
-/* ============ ЦВЕТА: тёмный → светлый по скроллу ============ */
-const lerp = (a, b, t) => a + (b - a) * t;
-const rgb = (c) => `rgb(${c[0]|0},${c[1]|0},${c[2]|0})`;
-const mix = (a, b, t) => a.map((v, i) => lerp(v, b[i], t));
-
-const blobStops = {
-  b1: [[0, [106, 63, 176]], [0.55, [200, 120, 90]],  [1, [240, 190, 110]]],
-  b2: [[0, [139, 79, 208]], [0.55, [210, 130, 80]],  [1, [238, 172, 80]]],
-  b3: [[0, [176, 108, 216]],[0.55, [200, 130, 150]], [1, [248, 214, 150]]],
-};
-
-function stopMix(stops, t) {
-  for (let i = 1; i < stops.length; i++) {
-    if (t <= stops[i][0]) {
-      const k = (t - stops[i-1][0]) / (stops[i][0] - stops[i-1][0]);
-      return mix(stops[i-1][1], stops[i][1], k);
-    }
+  /* ===== ПЛАВНЫЙ СКРОЛЛ (Lenis-подход: гоним нативный scrollTop с инерцией) ===== */
+  let target = window.scrollY, current = target, programmatic = false;
+  const maxScroll = () => document.documentElement.scrollHeight - innerHeight;
+  if (!reduce) {
+    addEventListener('wheel', (e) => {
+      e.preventDefault();
+      target = clamp(target + e.deltaY, 0, maxScroll());
+    }, { passive: false });
+    let ty = 0;
+    addEventListener('touchstart', (e) => { ty = e.touches[0].clientY; }, { passive: true });
+    addEventListener('touchmove', (e) => {
+      const y = e.touches[0].clientY; target = clamp(target + (ty - y) * 1.6, 0, maxScroll()); ty = y;
+    }, { passive: true });
+    addEventListener('keydown', (e) => {
+      const k = e.key;
+      if (k === 'PageDown') target = clamp(target + innerHeight*0.9, 0, maxScroll());
+      else if (k === 'PageUp') target = clamp(target - innerHeight*0.9, 0, maxScroll());
+      else if (k === 'End') target = maxScroll();
+      else if (k === 'Home') target = 0;
+      else if (k === 'ArrowDown') target = clamp(target + 90, 0, maxScroll());
+      else if (k === 'ArrowUp') target = clamp(target - 90, 0, maxScroll());
+    });
+    addEventListener('scroll', () => { if (!programmatic) { current = target = window.scrollY; } });
   }
-  return stops[stops.length - 1][1];
-}
 
-let scrollP = 0;
-function updateScroll() {
-  const max = document.documentElement.scrollHeight - innerHeight;
-  scrollP = max > 0 ? Math.min(1, scrollY / max) : 0;
-  const t = scrollP;
-  const r = document.documentElement.style;
-  r.setProperty('--blob1', rgb(stopMix(blobStops.b1, t)));
-  r.setProperty('--blob2', rgb(stopMix(blobStops.b2, t)));
-  r.setProperty('--blob3', rgb(stopMix(blobStops.b3, t)));
-  /* тёплое свечение нарастает во второй половине прокрутки */
-  r.setProperty('--warm', String(Math.min(1, Math.max(0, (t - 0.5) / 0.5) * 0.9)));
-  r.setProperty('--blobO', String(lerp(0.4, 0.32, t)));
-}
-addEventListener('scroll', updateScroll, { passive: true });
-updateScroll();
+  /* ===== ЭФФЕКТЫ ПО СКРОЛЛУ ===== */
+  const parallax = [...document.querySelectorAll('[data-parallax]')].map(el => ({ el, k: parseFloat(el.dataset.parallax) }));
+  const io = new IntersectionObserver((es) => {
+    es.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.14 });
+  document.querySelectorAll('.reveal, .fade-up').forEach(el => io.observe(el));
 
-/* ============ ЗАГОЛОВОК ПО БУКВАМ ============ */
-const ht = document.getElementById('heroTitle');
-ht.innerHTML = [...ht.textContent].map((c, i) =>
-  `<span class="ch" style="animation-delay:${0.35 + i * 0.09}s">${c}</span>`).join('');
-
-/* ============ КУРСОР ============ */
-const curDot = document.getElementById('curDot'), curRing = document.getElementById('curRing');
-let cx = -100, cy = -100, rx = -100, ry = -100;
-addEventListener('pointermove', (e) => { cx = e.clientX; cy = e.clientY; });
-document.querySelectorAll('a, button, .svc, .brace').forEach(el => {
-  el.addEventListener('pointerenter', () => curRing.classList.add('hover'));
-  el.addEventListener('pointerleave', () => curRing.classList.remove('hover'));
-});
-
-/* подсветка стеклянных карточек за курсором */
-document.querySelectorAll('.glass').forEach(el => {
-  el.addEventListener('pointermove', (e) => {
-    const b = el.getBoundingClientRect();
-    el.style.setProperty('--mx', ((e.clientX - b.left) / b.width * 100) + '%');
-    el.style.setProperty('--my', ((e.clientY - b.top) / b.height * 100) + '%');
+  /* ===== КУРСОР ===== */
+  const cur = document.getElementById('cur'), curTxt = document.getElementById('curTxt');
+  let mx = innerWidth/2, my = innerHeight/2, cx = mx, cy = my;
+  addEventListener('pointermove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
+  document.querySelectorAll('[data-cursor]').forEach(el => {
+    el.addEventListener('pointerenter', () => { curTxt.textContent = el.dataset.cursor; curTxt.classList.add('on'); });
+    el.addEventListener('pointerleave', () => curTxt.classList.remove('on'));
   });
-});
 
-/* ============ THREE: ЖИДКАЯ СФЕРА ============ */
-const canvas = document.getElementById('scene');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-
-const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 100);
-camera.position.set(0, 0, 9);
-
-scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-const key = new THREE.DirectionalLight(0xffe9bd, 1.5); key.position.set(4, 5, 6); scene.add(key);
-const rim = new THREE.DirectionalLight(0x4fa8e0, 1.1); rim.position.set(-5, -2, -4); scene.add(rim);
-
-const planet = new THREE.Group();
-scene.add(planet);
-
-/* --- цифровой глобус: тёмная сфера + точки-континенты + дуги данных --- */
-const noiseGLSL = `
-vec3 mod289(vec3 x){return x-floor(x*(1./289.))*289.;}
-vec4 mod289(vec4 x){return x-floor(x*(1./289.))*289.;}
-vec4 permute(vec4 x){return mod289(((x*34.)+1.)*x);}
-vec4 taylorInvSqrt(vec4 r){return 1.79284291400159-0.85373472095314*r;}
-float snoise(vec3 v){
-  const vec2 C=vec2(1./6.,1./3.);const vec4 D=vec4(0.,.5,1.,2.);
-  vec3 i=floor(v+dot(v,C.yyy));vec3 x0=v-i+dot(i,C.xxx);
-  vec3 g=step(x0.yzx,x0.xyz);vec3 l=1.-g;vec3 i1=min(g.xyz,l.zxy);vec3 i2=max(g.xyz,l.zxy);
-  vec3 x1=x0-i1+C.xxx;vec3 x2=x0-i2+C.yyy;vec3 x3=x0-D.yyy;
-  i=mod289(i);
-  vec4 p=permute(permute(permute(i.z+vec4(0.,i1.z,i2.z,1.))+i.y+vec4(0.,i1.y,i2.y,1.))+i.x+vec4(0.,i1.x,i2.x,1.));
-  float n_=0.142857142857;vec3 ns=n_*D.wyz-D.xzx;
-  vec4 j=p-49.*floor(p*ns.z*ns.z);
-  vec4 x_=floor(j*ns.z);vec4 y_=floor(j-7.*x_);
-  vec4 x=x_*ns.x+ns.yyyy;vec4 y=y_*ns.x+ns.yyyy;vec4 h=1.-abs(x)-abs(y);
-  vec4 b0=vec4(x.xy,y.xy);vec4 b1=vec4(x.zw,y.zw);
-  vec4 s0=floor(b0)*2.+1.;vec4 s1=floor(b1)*2.+1.;vec4 sh=-step(h,vec4(0.));
-  vec4 a0=b0.xzyw+s0.xzyw*sh.xxyy;vec4 a1=b1.xzyw+s1.xzyw*sh.zzww;
-  vec3 p0=vec3(a0.xy,h.x);vec3 p1=vec3(a0.zw,h.y);vec3 p2=vec3(a1.xy,h.z);vec3 p3=vec3(a1.zw,h.w);
-  vec4 norm=taylorInvSqrt(vec4(dot(p0,p0),dot(p1,p1),dot(p2,p2),dot(p3,p3)));
-  p0*=norm.x;p1*=norm.y;p2*=norm.z;p3*=norm.w;
-  vec4 m=max(.6-vec4(dot(x0,x0),dot(x1,x1),dot(x2,x2),dot(x3,x3)),0.);m=m*m;
-  return 42.*dot(m*m,vec4(dot(p0,x0),dot(p1,x1),dot(p2,x2),dot(p3,x3)));
-}`;
-
-const R = 2.15;
-const orbUniforms = {
-  uTime: { value: 0 },
-  uFade: { value: 1 },       // приглушение на светлом фоне
-};
-/* тёмное полупрозрачное тело планеты с неоновым ободом */
-const orb = new THREE.Mesh(
-  new THREE.SphereGeometry(R, 96, 96),
-  new THREE.ShaderMaterial({
-    transparent: true,
-    depthWrite: false,
-    uniforms: orbUniforms,
-    vertexShader: `
-      varying vec3 vN; varying vec3 vPos;
-      void main() {
-        vN = normalize(normalMatrix * normal);
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
-        vPos = mv.xyz;
-        gl_Position = projectionMatrix * mv;
-      }`,
-    fragmentShader: `
-      uniform float uFade;
-      varying vec3 vN; varying vec3 vPos;
-      void main() {
-        vec3 V = normalize(-vPos);
-        float F = pow(1.0 - abs(dot(vN, V)), 1.9);
-        vec3 deep = vec3(0.05, 0.03, 0.02);    /* тёмное тело планеты */
-        vec3 amber = vec3(0.55, 0.32, 0.08);
-        vec3 gold = vec3(1.0, 0.78, 0.34);     /* золотой неоновый край */
-        vec3 col = mix(deep, amber, F * 0.8);
-        col = mix(col, gold, pow(F, 2.6));
-        float a = (0.32 + F * 0.62) * uFade;
-        gl_FragColor = vec4(col, a);
-      }`
-  })
-);
-planet.add(orb);
-
-/* точки-«континенты» на поверхности: кластеры как огни городов */
-function surfMask(x, y, z) {
-  return Math.sin(x * 2.9 + 0.4) * Math.sin(y * 3.6 + 1.3) * Math.sin(z * 2.2 + 2.7)
-       + 0.45 * Math.sin(x * 6.1 + y * 4.7 + z * 5.3);
-}
-function makeSurfPoints(count, threshold, color, size, opacity) {
-  const pos = [];
-  let guard = 0;
-  while (pos.length < count * 3 && guard++ < count * 60) {
-    const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
-    const x = Math.sin(ph) * Math.cos(th), y = Math.cos(ph), z = Math.sin(ph) * Math.sin(th);
-    if (surfMask(x, y, z) > threshold) pos.push(x * R * 1.01, y * R * 1.01, z * R * 1.01);
-  }
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos), 3));
-  return new THREE.Points(geo, new THREE.PointsMaterial({ color, size, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false }));
-}
-const cityPts  = makeSurfPoints(2400, 0.16, 0xffb43a, 0.028, 0.9);
-const hotPts   = makeSurfPoints(180, 0.52, 0xffe6a0, 0.06, 0.95);
-planet.add(cityPts, hotPts);
-
-/* сетевой каркас: узлы на сфере + рёбра между близкими (как на референсе) */
-const grid = new THREE.Group();
-const nodePos = [];
-{
-  const nodes = [];
-  const NN = 110;
-  /* равномерно по сфере — спираль Фибоначчи, чуть выше поверхности */
-  const gr = Math.PI * (3 - Math.sqrt(5));
-  const rr = R * 1.14;
-  for (let i = 0; i < NN; i++) {
-    const y = 1 - (i / (NN - 1)) * 2;
-    const rad = Math.sqrt(1 - y * y);
-    const th = gr * i + Math.random() * 0.25;
-    nodes.push(new THREE.Vector3(Math.cos(th) * rad * rr, y * rr, Math.sin(th) * rad * rr));
-  }
-  const edgePts = [];
-  for (let i = 0; i < NN; i++) {
-    for (let j = i + 1; j < NN; j++) {
-      if (nodes[i].distanceTo(nodes[j]) < R * 0.62) edgePts.push(nodes[i], nodes[j]);
-    }
-  }
-  grid.add(new THREE.LineSegments(
-    new THREE.BufferGeometry().setFromPoints(edgePts),
-    new THREE.LineBasicMaterial({ color: 0xe0a844, transparent: true, opacity: 0.26, blending: THREE.AdditiveBlending, depthWrite: false })
-  ));
-  nodes.forEach(n => nodePos.push(n.x, n.y, n.z));
-  grid.add(new THREE.Points(
-    new THREE.BufferGeometry().setAttribute('position', new THREE.BufferAttribute(new Float32Array(nodePos), 3)),
-    new THREE.PointsMaterial({ color: 0xffd67a, size: 0.07, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })
-  ));
-}
-planet.add(grid);
-
-/* дуги данных между точками поверхности + бегущие импульсы */
-const arcCurves = [];
-const arcs = new THREE.Group();
-{
-  const colA = 0xffd07a, colB = 0xe89a3a;
-  for (let i = 0; i < 16; i++) {
-    const rndDir = () => {
-      const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
-      return new THREE.Vector3(Math.sin(ph) * Math.cos(th), Math.cos(ph), Math.sin(ph) * Math.sin(th));
-    };
-    const A = rndDir().multiplyScalar(R), B = rndDir().multiplyScalar(R);
-    if (A.distanceTo(B) < 1.4) { i--; continue; }
-    const mid = A.clone().add(B).normalize().multiplyScalar(R * (1.25 + Math.random() * 0.45));
-    const curve = new THREE.QuadraticBezierCurve3(A, mid, B);
-    arcCurves.push(curve);
-    const line = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(curve.getPoints(48)),
-      new THREE.LineBasicMaterial({ color: i % 3 ? colB : colA, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending })
-    );
-    arcs.add(line);
-  }
-}
-planet.add(arcs);
-
-const pulseGeo = new THREE.BufferGeometry();
-pulseGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(arcCurves.length * 3), 3));
-const pulses = new THREE.Points(pulseGeo, new THREE.PointsMaterial({ color: 0xffe6a8, size: 0.09, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
-planet.add(pulses);
-const _pv = new THREE.Vector3();
-function globeTick(t) {
-  const p = pulseGeo.attributes.position.array;
-  for (let i = 0; i < arcCurves.length; i++) {
-    arcCurves[i].getPoint((t * 0.22 + i / arcCurves.length) % 1, _pv);
-    p[i*3] = _pv.x; p[i*3+1] = _pv.y; p[i*3+2] = _pv.z;
-  }
-  pulseGeo.attributes.position.needsUpdate = true;
-}
-
-/* атмосферное свечение */
-const halo = new THREE.Mesh(
-  new THREE.SphereGeometry(R * 1.24, 48, 48),
-  new THREE.ShaderMaterial({
-    transparent: true, side: THREE.BackSide, depthWrite: false,
-    uniforms: { uFade: { value: 1 } },
-    vertexShader: `varying float vI; void main(){ vec3 n = normalize(normalMatrix * normal); vec3 v = normalize((modelViewMatrix * vec4(position,1.)).xyz); vI = pow(1.0 - abs(dot(n, -v)), 3.2); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.); }`,
-    fragmentShader: `uniform float uFade; varying float vI; void main(){ vec3 c = mix(vec3(1.0,0.78,0.36), vec3(1.0,0.9,0.6), 0.3); gl_FragColor = vec4(c, vI * 0.55 * uFade); }`
-  })
-);
-planet.add(halo);
-
-/* кольцо из частиц вокруг сферы */
-const ringGeo = new THREE.BufferGeometry();
-{
-  const N = 900, pos = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) {
-    const a = Math.random() * Math.PI * 2;
-    const r = 2.9 + Math.random() * 1.15 + (Math.random() < 0.2 ? Math.random() * 0.6 : 0);
-    pos[i*3] = Math.cos(a) * r;
-    pos[i*3+1] = (Math.random() - 0.5) * 0.16;
-    pos[i*3+2] = Math.sin(a) * r;
-  }
-  ringGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-}
-const ring = new THREE.Points(ringGeo, new THREE.PointsMaterial({ color: 0xf0c46a, size: 0.026, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }));
-ring.rotation.x = 1.05; ring.rotation.z = -0.22;
-planet.add(ring);
-
-/* ---- 4 внутренних объекта ---- */
-const inner = new THREE.Group();
-planet.add(inner);
-const states = [];
-
-/* 0: КРИСТАЛЛ (Таро) */
-{
-  const g = new THREE.Group();
-  const mat = new THREE.MeshPhysicalMaterial({ color: 0xffd27a, metalness: 0.55, roughness: 0.12, emissive: 0x8a4e0e, emissiveIntensity: 0.7, flatShading: true, transparent: true, opacity: 0.96 });
-  const main = new THREE.Mesh(new THREE.OctahedronGeometry(0.8), mat); g.add(main);
-  for (let i = 0; i < 4; i++) {
-    const s = new THREE.Mesh(new THREE.OctahedronGeometry(0.14 + Math.random() * 0.1), mat.clone());
-    const a = i / 4 * Math.PI * 2;
-    s.position.set(Math.cos(a) * 1.2, Math.sin(a * 1.7) * 0.5, Math.sin(a) * 1.2);
-    g.add(s);
-  }
-  const lt = new THREE.PointLight(0xffb43a, 1.6, 6); g.add(lt);
-  states.push({ group: g, update: (t) => {
-    g.rotation.y = t * 0.55;
-    g.children[0].rotation.x = t * 0.35;
-    g.children.forEach((c, i) => { if (i > 0 && c.isMesh) c.position.y = Math.sin(t * 1.3 + i * 2.1) * 0.5; });
-  }});
-}
-
-/* 1: ОГОНЬ (Поле) */
-{
-  const g = new THREE.Group();
-  const N = 260;
-  const pos = new Float32Array(N * 3), seed = new Float32Array(N);
-  const cols = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) seed[i] = Math.random();
-  const geo = new THREE.BufferGeometry();
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
-  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ vertexColors: true, size: 0.1, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
-  g.add(pts);
-  const core = new THREE.PointLight(0xff8c3a, 2.6, 6); g.add(core);
-  const cWarm = new THREE.Color(0xffd98a), cHot = new THREE.Color(0xff6a2a);
-  states.push({ group: g, update: (t) => {
-    const p = geo.attributes.position.array, c = geo.attributes.color.array;
-    for (let i = 0; i < N; i++) {
-      const life = (t * 0.5 + seed[i]) % 1;
-      const r = (1 - life) * 0.55 * (0.4 + seed[i] * 0.6);
-      const a = seed[i] * 40 + t * 1.3;
-      p[i*3] = Math.cos(a) * r;
-      p[i*3+1] = life * 2.3 - 1.15;
-      p[i*3+2] = Math.sin(a) * r;
-      const col = life < 0.35 ? cHot : cWarm;
-      c[i*3] = col.r; c[i*3+1] = col.g; c[i*3+2] = col.b;
-    }
-    geo.attributes.position.needsUpdate = true;
-    geo.attributes.color.needsUpdate = true;
-  }});
-}
-
-/* 2: БАБОЧКА (Метаразбор) — крылья с градиентной текстурой */
-{
-  const g = new THREE.Group();
-  const wc = document.createElement('canvas'); wc.width = wc.height = 256;
-  const wctx = wc.getContext('2d');
-  const grad = wctx.createRadialGradient(60, 130, 10, 128, 128, 150);
-  grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.45, '#e8f0fa'); grad.addColorStop(0.8, '#b8d4ee'); grad.addColorStop(1, '#7fa8d0');
-  wctx.fillStyle = grad; wctx.fillRect(0, 0, 256, 256);
-  const wtex = new THREE.CanvasTexture(wc);
-
-  const wingShape = new THREE.Shape();
-  wingShape.moveTo(0, 0);
-  wingShape.bezierCurveTo(0.7, 0.95, 1.55, 0.72, 1.4, -0.1);
-  wingShape.bezierCurveTo(1.32, -0.56, 0.66, -0.5, 0.36, -0.28);
-  wingShape.bezierCurveTo(0.62, -0.72, 0.5, -1.18, 0.12, -0.96);
-  wingShape.bezierCurveTo(0, -0.86, 0, -0.3, 0, 0);
-  const wingGeo = new THREE.ShapeGeometry(wingShape, 32);
-  /* UV по границам фигуры */
-  wingGeo.computeBoundingBox();
-  const bb = wingGeo.boundingBox, uv = wingGeo.attributes.uv, vp = wingGeo.attributes.position;
-  for (let i = 0; i < uv.count; i++) {
-    uv.setXY(i, (vp.getX(i) - bb.min.x) / (bb.max.x - bb.min.x), (vp.getY(i) - bb.min.y) / (bb.max.y - bb.min.y));
-  }
-  const wingMat = new THREE.MeshPhysicalMaterial({ map: wtex, emissive: 0xa8c8e8, emissiveIntensity: 0.35, emissiveMap: wtex, side: THREE.DoubleSide, transparent: true, opacity: 0.92, metalness: 0.05, roughness: 0.45 });
-  const wL = new THREE.Mesh(wingGeo, wingMat);
-  const wR = new THREE.Mesh(wingGeo, wingMat.clone()); wR.scale.x = -1;
-  const body = new THREE.Mesh(new THREE.CapsuleGeometry(0.05, 0.75, 4, 10), new THREE.MeshPhysicalMaterial({ color: 0x241d3a, roughness: 0.4, metalness: 0.3 }));
-  const lt = new THREE.PointLight(0x8a9cff, 1.1, 5); lt.position.set(0, 0.4, 0.6);
-  g.add(wL, wR, body, lt);
-  g.scale.setScalar(0.85);
-  states.push({ group: g, update: (t) => {
-    const flap = Math.sin(t * 7) * 0.85;
-    wL.rotation.y = flap; wR.rotation.y = -flap;
-    g.position.y = Math.sin(t * 2.1) * 0.3;
-    g.rotation.y = Math.sin(t * 0.7) * 0.5;
-    g.rotation.x = -0.35;
-  }});
-}
-
-/* 3: ОГНЕННЫЙ ТОРНАДО (Чистки) */
-{
-  const g = new THREE.Group();
-  const N = 1600;
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(N * 3), col = new Float32Array(N * 3),
-        seed = new Float32Array(N), seed2 = new Float32Array(N), seed3 = new Float32Array(N);
-  for (let i = 0; i < N; i++) { seed[i] = Math.random(); seed2[i] = Math.random(); seed3[i] = Math.random(); }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ vertexColors: true, size: 0.075, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }));
-  g.add(pts);
-  const lt = new THREE.PointLight(0xff7a2a, 2.4, 6); lt.position.y = 0.4; g.add(lt);
-  const lt2 = new THREE.PointLight(0xffd050, 1.4, 5); lt2.position.y = 1.1; g.add(lt2);
-  /* палитра пламени: тёмно-красное основание -> оранжевое -> жёлто-белая вершина */
-  const cDark = new THREE.Color(0x5a1400), cRed = new THREE.Color(0xd83010),
-        cOrange = new THREE.Color(0xff7a1a), cYellow = new THREE.Color(0xffdc6e), cWhite = new THREE.Color(0xfff2c8);
-  const _c = new THREE.Color();
-  states.push({ group: g, update: (t) => {
-    const p = geo.attributes.position.array, c = geo.attributes.color.array;
-    for (let i = 0; i < N; i++) {
-      /* h — положение вдоль воронки снизу(0) вверх(1) */
-      const h = (seed[i] + t * (0.28 + seed[i] * 0.25)) % 1;
-      const y = h * 2.9 - 1.5;
-      /* воронка: узко внизу, широкий раструб вверху + завихрение у основания */
-      const flare = h < 0.12 ? (0.12 - h) * 4.8 : 0;
-      const baseR = 0.06 + Math.pow(h, 1.55) * 1.2 + flare;
-      /* заполняем воронку по толщине: частицы на разных радиусах + шум */
-      const r = baseR * (0.35 + seed2[i] * 0.75) + Math.sin(t * 7 + seed3[i] * 40) * 0.05 * (0.3 + h);
-      const spin = seed2[i] * 6.28 + t * (5.4 - h * 2.6) + seed3[i] * 0.8;
-      p[i*3]   = Math.cos(spin) * r;
-      p[i*3+1] = y + Math.sin(t * 9 + seed3[i] * 20) * 0.03;
-      p[i*3+2] = Math.sin(spin) * r;
-      /* цвет по высоте + мерцание */
-      const fl = 0.5 + 0.5 * Math.sin(t * 12 + seed[i] * 50);
-      if (h < 0.2) _c.copy(cDark).lerp(cRed, h / 0.2);
-      else if (h < 0.5) _c.copy(cRed).lerp(cOrange, (h - 0.2) / 0.3);
-      else if (h < 0.8) _c.copy(cOrange).lerp(cYellow, (h - 0.5) / 0.3);
-      else _c.copy(cYellow).lerp(cWhite, (h - 0.8) / 0.2);
-      const k = 0.7 + 0.3 * fl;
-      c[i*3] = _c.r * k; c[i*3+1] = _c.g * k; c[i*3+2] = _c.b * k;
-    }
-    geo.attributes.position.needsUpdate = true;
-    geo.attributes.color.needsUpdate = true;
-  }});
-}
-
-states.forEach((s, i) => { s.group.visible = i === 0; s.group.scale.setScalar(i === 0 ? 0.85 : 0.001); inner.add(s.group); });
-
-/* ---- звёздная пыль: два слоя ---- */
-function makeDust(count, color, size, spread) {
-  const geo = new THREE.BufferGeometry();
-  const pos = new Float32Array(count * 3);
-  for (let i = 0; i < count; i++) {
-    const r = 5 + Math.random() * spread;
-    const th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
-    pos[i*3] = r * Math.sin(ph) * Math.cos(th);
-    pos[i*3+1] = r * Math.sin(ph) * Math.sin(th) * 0.6;
-    pos[i*3+2] = -Math.abs(r * Math.cos(ph)) - 2;
-  }
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-  return new THREE.Points(geo, new THREE.PointsMaterial({ color, size, transparent: true, opacity: 0.65, depthWrite: false }));
-}
-const dust1 = makeDust(420, 0xd4af5e, 0.03, 13);
-const dust2 = makeDust(260, 0xb07cd8, 0.024, 16);
-scene.add(dust1, dust2);
-
-/* ---- переключение состояний ---- */
-let cur = 0, switching = false;
-const dots = [...document.querySelectorAll('.orbit-dot')];
-
-function setState(n, scroll = true) {
-  if (n === cur || switching) return;
-  switching = true;
-  const from = states[cur].group, to = states[n].group;
-  to.visible = true;
-  const t0 = performance.now();
-  const spinFrom = planet.rotation.y;
-  function anim(now) {
-    const k = Math.min(1, (now - t0) / 750);
-    const e = k < 0.5 ? 4*k*k*k : 1 - Math.pow(-2*k+2, 3)/2;
-    from.scale.setScalar(Math.max(0.001, 0.85 * (1 - Math.min(1, k * 2))));
-    to.scale.setScalar(0.001 + 0.849 * Math.max(0, (k - 0.35) / 0.65));
-    planet.rotation.y = spinFrom + e * Math.PI * 2;
-    if (k < 1) requestAnimationFrame(anim);
-    else { from.visible = false; cur = n; switching = false; }
-  }
-  requestAnimationFrame(anim);
-  dots.forEach((d, i) => d.classList.toggle('active', i === n));
-  if (scroll) document.getElementById('svc-' + n)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-dots.forEach(d => d.addEventListener('click', () => setState(+d.dataset.state)));
-document.querySelectorAll('.svc').forEach(c => c.addEventListener('click', () => setState(+c.dataset.state, false)));
-
-/* клик по сфере */
-const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
-let mouseX = 0, mouseY = 0;
-addEventListener('click', (e) => {
-  if (e.target.closest('.content a, nav, .orbit-nav, .svc, footer')) return;
-  ptr.x = (e.clientX / innerWidth) * 2 - 1;
-  ptr.y = -(e.clientY / innerHeight) * 2 + 1;
-  ray.setFromCamera(ptr, camera);
-  if (ray.intersectObject(orb).length) setState((cur + 1) % 4);
-});
-addEventListener('pointermove', (e) => {
-  mouseX = (e.clientX / innerWidth) * 2 - 1;
-  mouseY = (e.clientY / innerHeight) * 2 - 1;
-  ptr.x = mouseX; ptr.y = -mouseY;
-  ray.setFromCamera(ptr, camera);
-  const over = ray.intersectObject(orb).length > 0;
-  curRing.classList.toggle('hover', over || curRing.classList.contains('hover'));
-  if (over) curRing.classList.add('hover');
-});
-
-/* ---- рендер ---- */
-function resize() {
-  renderer.setSize(innerWidth, innerHeight);
-  camera.aspect = innerWidth / innerHeight;
-  camera.updateProjectionMatrix();
-}
-addEventListener('resize', resize);
-resize();
-
-const clock = new THREE.Clock();
-function loop() {
-  requestAnimationFrame(loop);
-  const t = clock.getElapsedTime();
-  orbUniforms.uTime.value = t;
-
-  globeTick(t);
-  if (!switching && !reduceMotion) planet.rotation.y += 0.0016;
-  planet.rotation.x = lerp(planet.rotation.x, mouseY * 0.16, 0.04);
-  planet.rotation.z = lerp(planet.rotation.z, -mouseX * 0.09, 0.04);
-
-  const side = innerWidth > 768 ? 2.6 : 0;
-  planet.position.x = lerp(0, side, Math.min(1, scrollP * 2.2));
-  planet.position.y = lerp(-0.3, 0.2, scrollP);
-  planet.scale.setScalar(lerp(1, 0.72, Math.min(1, scrollP * 1.6)));
-
-  const fade = lerp(1, 0.55, scrollP);
-  orbUniforms.uFade.value = fade;
-  halo.material.uniforms.uFade.value = fade;
-  ring.material.opacity = lerp(0.6, 0.25, scrollP);
-  ring.rotation.y = t * 0.05;
-  cityPts.material.opacity = lerp(0.85, 0.4, scrollP);
-  hotPts.material.opacity = lerp(0.95, 0.5, scrollP);
-  arcs.children.forEach(l => l.material.opacity = lerp(0.28, 0.12, scrollP));
-  pulses.material.opacity = lerp(0.95, 0.4, scrollP);
-  grid.children.forEach(l => l.material.opacity = lerp(0.10, 0.04, scrollP));
-  dust1.material.opacity = lerp(0.65, 0.12, scrollP);
-  dust2.material.opacity = lerp(0.5, 0.08, scrollP);
-  dust1.rotation.y = t * 0.008;
-  dust2.rotation.y = -t * 0.005;
-
-  states[cur].update(reduceMotion ? 0 : t);
-
-  /* курсор */
-  rx = lerp(rx, cx, 0.16); ry = lerp(ry, cy, 0.16);
-  curDot.style.transform = `translate(${cx}px, ${cy}px) translate(-50%,-50%)`;
-  curRing.style.transform = `translate(${rx}px, ${ry}px) translate(-50%,-50%)`;
-
-  renderer.render(scene, camera);
-}
-loop();
-
-/* ============ 2D-БАБОЧКИ ============ */
-const fc = document.getElementById('flies');
-const fx = fc.getContext('2d');
-let fw, fh;
-function fresize() { fw = fc.width = innerWidth; fh = fc.height = innerHeight; }
-addEventListener('resize', fresize); fresize();
-
-/* контур крыла (в локальных координатах, x>=0 — правое крыло) */
-const WING_UP = { cx: 0.6, cy: -0.2, rx: 0.62, ry: 0.46, rot: -0.4 };
-const WING_LO = { cx: 0.42, cy: 0.36, rx: 0.42, ry: 0.3, rot: 0.5 };
-function inEllipse(x, y, e) {
-  const c = Math.cos(-e.rot), s = Math.sin(-e.rot);
-  const dx = x - e.cx, dy = y - e.cy;
-  const u = (dx * c - dy * s) / e.rx, v = (dx * s + dy * c) / e.ry;
-  return u * u + v * v <= 1;
-}
-const flies = [];
-const FN = innerWidth > 768 ? 16 : 9;
-for (let i = 0; i < FN; i++) {
-  /* искры внутри крыла — золото, редко бирюза/белый */
-  const dots = [];
-  let guard = 0;
-  while (dots.length < 34 && guard++ < 400) {
-    const x = Math.random() * 1.25, y = -0.6 + Math.random() * 1.15;
-    if (inEllipse(x, y, WING_UP) || inEllipse(x, y, WING_LO)) {
-      const r = Math.random();
-      const col = r < 0.72 ? 'rgba(255,205,110,' : r < 0.86 ? 'rgba(255,240,210,' : 'rgba(150,220,240,';
-      dots.push({ x, y, r: Math.random() * 0.045 + 0.012, col, tw: Math.random() * 6.28 });
-    }
-  }
-  flies.push({
-    x: Math.random() * fw, y: Math.random() * fh,
-    vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6,
-    s: 7 + Math.random() * 12, ph: Math.random() * 10,
-    depth: 0.55 + Math.random() * 0.45,
-    dots,
+  /* ===== ПЛАВАЮЩАЯ КАРТИНКА ПРАКТИК ===== */
+  const pracFloat = document.getElementById('pracFloat');
+  const pracFloatPlate = document.getElementById('pracFloatPlate');
+  let pfx = mx, pfy = my, pfActive = false;
+  document.querySelectorAll('.prac-row').forEach(row => {
+    row.addEventListener('pointerenter', () => {
+      pracFloatPlate.className = 'plate ' + row.dataset.plate;
+      pracFloat.classList.add('on'); pfActive = true;
+    });
+    row.addEventListener('pointerleave', () => { pracFloat.classList.remove('on'); pfActive = false; });
   });
-}
-let mx2 = -999, my2 = -999;
-addEventListener('pointermove', (e) => { mx2 = e.clientX; my2 = e.clientY; });
 
-function wingPath(S) {
-  /* контур крыла из двух долей — верхняя большая, нижняя поменьше */
-  fx.beginPath();
-  fx.ellipse(WING_UP.cx * S, WING_UP.cy * S, WING_UP.rx * S, WING_UP.ry * S, WING_UP.rot, 0, Math.PI * 2);
-  fx.ellipse(WING_LO.cx * S, WING_LO.cy * S, WING_LO.rx * S, WING_LO.ry * S, WING_LO.rot, 0, Math.PI * 2);
-}
-function drawFly(f, t) {
-  const flap = Math.sin(t * 8 + f.ph) * 0.75;
-  const alpha = f.depth * lerp(0.9, 0, Math.min(1, scrollP * 3.2));
-  if (alpha <= 0.01) return;
-  const S = f.s;
-  fx.save();
-  fx.translate(f.x, f.y);
-  fx.rotate(Math.atan2(f.vy, f.vx) + Math.PI / 2);
-  fx.scale(f.depth, f.depth);
-  fx.lineCap = 'round';
+  /* ===== ЯКОРНЫЕ ССЫЛКИ ===== */
+  document.querySelectorAll('[data-link]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      const id = a.getAttribute('href');
+      if (!id.startsWith('#')) return;
+      e.preventDefault();
+      const el = document.querySelector(id);
+      const to = id === '#top' ? 0 : el.getBoundingClientRect().top + window.scrollY - 40;
+      if (reduce) { window.scrollTo(0, to); } else { target = clamp(to, 0, maxScroll()); }
+    });
+  });
 
-  for (const dir of [-1, 1]) {
-    fx.save();
-    fx.scale(dir * (0.4 + Math.abs(flap) * 0.6), 1);
-    fx.shadowColor = 'rgba(255,190,90,0.9)';
-    fx.shadowBlur = 10;
-
-    /* лёгкая прозрачная плёнка крыла */
-    const g1 = fx.createRadialGradient(S * 0.2, 0, S * 0.05, S * 0.6, 0, S * 1.1);
-    g1.addColorStop(0, `rgba(255,210,130,${alpha * 0.14})`);
-    g1.addColorStop(0.7, `rgba(255,170,80,${alpha * 0.06})`);
-    g1.addColorStop(1, 'rgba(255,150,60,0)');
-    fx.fillStyle = g1;
-    wingPath(S); fx.fill();
-
-    /* прожилки-волокна: радиальные от основания к краю */
-    fx.strokeStyle = `rgba(255,200,110,${alpha * 0.55})`;
-    fx.lineWidth = 0.5;
-    for (let v = 0; v <= 7; v++) {
-      const k = v / 7;
-      const tx = lerp(WING_UP.cx + WING_UP.rx * 0.8, WING_LO.cx + WING_LO.rx * 0.2, k) * S;
-      const ty = lerp(WING_UP.cy - WING_UP.ry * 0.7, WING_LO.cy + WING_LO.ry * 0.9, k) * S;
-      fx.beginPath();
-      fx.moveTo(S * 0.05, 0);
-      fx.quadraticCurveTo(tx * 0.55, ty * 0.5, tx, ty);
-      fx.stroke();
+  /* ===== ГЛАВНЫЙ ЦИКЛ ===== */
+  function raf() {
+    requestAnimationFrame(raf);
+    if (!reduce) {
+      current = lerp(current, target, 0.085);
+      if (Math.abs(current - target) < 0.06) current = target;
+      programmatic = true; window.scrollTo(0, current); programmatic = false;
     }
-    /* поперечные волокна — тонкая сетка как на референсе */
-    fx.strokeStyle = `rgba(255,215,140,${alpha * 0.3})`;
-    fx.lineWidth = 0.4;
-    for (let a = 1; a <= 3; a++) {
-      const rr = a / 3;
-      fx.beginPath();
-      fx.ellipse(WING_UP.cx * S * rr, WING_UP.cy * S * rr * 0.8, WING_UP.rx * S * rr, WING_UP.ry * S * rr, WING_UP.rot, -0.4, Math.PI + 0.2);
-      fx.stroke();
+    const sy = window.scrollY;
+    for (const p of parallax) {
+      const r = p.el.getBoundingClientRect();
+      const off = (r.top + r.height/2 - innerHeight/2) * p.k;
+      p.el.style.transform = `translateY(${(-off).toFixed(2)}px) scale(1.06)`;
     }
-
-    /* светящийся контур */
-    fx.strokeStyle = `rgba(255,225,150,${alpha * 0.85})`;
-    fx.lineWidth = 0.9;
-    wingPath(S); fx.stroke();
-
-    /* искры-точки */
-    for (const d of f.dots) {
-      const tw = 0.5 + 0.5 * Math.sin(t * 3 + d.tw);
-      fx.fillStyle = d.col + (alpha * (0.4 + 0.6 * tw)) + ')';
-      fx.beginPath(); fx.arc(d.x * S, d.y * S, d.r * S, 0, Math.PI * 2); fx.fill();
-    }
-    fx.restore();
+    // курсор
+    cx = lerp(cx, mx, 0.2); cy = lerp(cy, my, 0.2);
+    cur.style.transform = `translate(${mx}px,${my}px) translate(-50%,-50%)`;
+    curTxt.style.left = mx + 'px'; curTxt.style.top = (my - 34) + 'px';
+    // плавающая картинка
+    pfx = lerp(pfx, mx, 0.12); pfy = lerp(pfy, my, 0.12);
+    pracFloat.style.left = pfx + 'px'; pracFloat.style.top = pfy + 'px';
   }
-
-  /* тельце — светящееся золото */
-  fx.shadowColor = 'rgba(255,190,90,0.9)'; fx.shadowBlur = 8;
-  const bg = fx.createLinearGradient(0, -S * 0.4, 0, S * 0.4);
-  bg.addColorStop(0, `rgba(255,235,180,${alpha})`);
-  bg.addColorStop(1, `rgba(220,150,60,${alpha})`);
-  fx.fillStyle = bg;
-  fx.beginPath(); fx.ellipse(0, 0, S * 0.05, S * 0.4, 0, 0, Math.PI * 2); fx.fill();
-
-  /* усики */
-  fx.strokeStyle = `rgba(255,210,120,${alpha * 0.8})`;
-  fx.lineWidth = 0.6;
-  for (const d of [-1, 1]) {
-    fx.beginPath();
-    fx.moveTo(0, -S * 0.36);
-    fx.quadraticCurveTo(d * S * 0.22, -S * 0.66, d * S * 0.34, -S * 0.58);
-    fx.stroke();
-  }
-  fx.restore();
-}
-
-function fliesLoop() {
-  requestAnimationFrame(fliesLoop);
-  fx.clearRect(0, 0, fw, fh);
-  if (scrollP > 0.34 || reduceMotion) return;
-  const t = performance.now() / 1000;
-  for (const f of flies) {
-    const dx = f.x - mx2, dy = f.y - my2, d2 = dx * dx + dy * dy;
-    if (d2 < 150 * 150 && d2 > 1) {
-      const d = Math.sqrt(d2);
-      f.vx += (dx / d) * 0.95; f.vy += (dy / d) * 0.95;
-    }
-    f.vx += Math.sin(t * 0.8 + f.ph) * 0.02;
-    f.vy += Math.cos(t * 0.6 + f.ph * 2) * 0.02;
-    f.vy -= scrollP * 1.2;
-    f.vx *= 0.96; f.vy *= 0.96;
-    const sp = Math.hypot(f.vx, f.vy);
-    if (sp > 4.2) { f.vx = f.vx / sp * 4.2; f.vy = f.vy / sp * 4.2; }
-    f.x += f.vx; f.y += f.vy;
-    if (f.x < -30) f.x = fw + 30; if (f.x > fw + 30) f.x = -30;
-    if (f.y < -40) f.y = fh + 30; if (f.y > fh + 40) f.y = -40;
-    drawFly(f, t);
-  }
-}
-fliesLoop();
-
-/* ============ ЗАСТАВКА: ЭКРАН В БАБОЧКАХ → РАЗЛЁТ ============ */
-function wingPathG(g, S) {
-  g.beginPath();
-  g.ellipse(WING_UP.cx * S, WING_UP.cy * S, WING_UP.rx * S, WING_UP.ry * S, WING_UP.rot, 0, Math.PI * 2);
-  g.ellipse(WING_LO.cx * S, WING_LO.cy * S, WING_LO.rx * S, WING_LO.ry * S, WING_LO.rot, 0, Math.PI * 2);
-}
-/* пре-рендер спрайта бабочки (золотые волокна) для быстрой отрисовки сотен копий */
-function makeButterflySprite(flap) {
-  const SP = 160, S = 34;
-  const c = document.createElement('canvas'); c.width = c.height = SP;
-  const g = c.getContext('2d');
-  g.translate(SP / 2, SP / 2 + 4);
-  for (const dir of [-1, 1]) {
-    g.save();
-    g.scale(dir * flap, 1);
-    g.shadowColor = 'rgba(255,190,90,0.95)'; g.shadowBlur = 9;
-    const grd = g.createRadialGradient(S * 0.2, 0, S * 0.05, S * 0.6, 0, S * 1.1);
-    grd.addColorStop(0, 'rgba(255,214,140,0.22)');
-    grd.addColorStop(0.7, 'rgba(255,175,85,0.09)');
-    grd.addColorStop(1, 'rgba(255,150,60,0)');
-    g.fillStyle = grd; wingPathG(g, S); g.fill();
-    g.strokeStyle = 'rgba(255,205,115,0.6)'; g.lineWidth = 0.6;
-    for (let v = 0; v <= 7; v++) {
-      const k = v / 7;
-      const tx = lerp(WING_UP.cx + WING_UP.rx * 0.8, WING_LO.cx + WING_LO.rx * 0.2, k) * S;
-      const ty = lerp(WING_UP.cy - WING_UP.ry * 0.7, WING_LO.cy + WING_LO.ry * 0.9, k) * S;
-      g.beginPath(); g.moveTo(S * 0.05, 0); g.quadraticCurveTo(tx * 0.55, ty * 0.5, tx, ty); g.stroke();
-    }
-    g.strokeStyle = 'rgba(255,215,140,0.35)'; g.lineWidth = 0.4;
-    for (let a = 1; a <= 3; a++) {
-      const rr = a / 3;
-      g.beginPath(); g.ellipse(WING_UP.cx * S * rr, WING_UP.cy * S * rr * 0.8, WING_UP.rx * S * rr, WING_UP.ry * S * rr, WING_UP.rot, -0.4, Math.PI + 0.2); g.stroke();
-    }
-    g.strokeStyle = 'rgba(255,228,155,0.9)'; g.lineWidth = 1; wingPathG(g, S); g.stroke();
-    /* искры */
-    for (let d = 0; d < 12; d++) {
-      const x = Math.random() * 1.2, y = -0.5 + Math.random();
-      if (inEllipse(x, y, WING_UP) || inEllipse(x, y, WING_LO)) {
-        g.fillStyle = Math.random() < 0.8 ? 'rgba(255,220,150,0.9)' : 'rgba(180,230,245,0.85)';
-        g.beginPath(); g.arc(x * S, y * S, Math.random() * 1.2 + 0.5, 0, Math.PI * 2); g.fill();
-      }
-    }
-    g.restore();
-  }
-  g.shadowColor = 'rgba(255,190,90,0.9)'; g.shadowBlur = 7;
-  const bg = g.createLinearGradient(0, -S * 0.4, 0, S * 0.4);
-  bg.addColorStop(0, 'rgba(255,238,190,1)'); bg.addColorStop(1, 'rgba(210,145,55,1)');
-  g.fillStyle = bg; g.beginPath(); g.ellipse(0, 0, S * 0.05, S * 0.4, 0, 0, Math.PI * 2); g.fill();
-  g.strokeStyle = 'rgba(255,212,125,0.85)'; g.lineWidth = 0.7;
-  for (const d of [-1, 1]) { g.beginPath(); g.moveTo(0, -S * 0.36); g.quadraticCurveTo(d * S * 0.22, -S * 0.66, d * S * 0.34, -S * 0.58); g.stroke(); }
-  return c;
-}
-const introCanvas = document.getElementById('intro');
-const introHint = document.getElementById('introHint');
-const ictx = introCanvas.getContext('2d');
-const FRAMES = [0.35, 0.55, 0.78, 1.0, 0.78, 0.55].map(makeButterflySprite);
-const SPRITE = 160;
-
-let iw = 0, ih = 0, idpr = 1, swarm = [], introActive = true, introStart = performance.now();
-let icx = -999, icy = -999, disperse = false, disperseAt = 0;
-
-function buildSwarm() {
-  idpr = Math.min(devicePixelRatio, 2);
-  iw = innerWidth; ih = innerHeight;
-  introCanvas.width = iw * idpr; introCanvas.height = ih * idpr;
-  introCanvas.style.width = iw + 'px'; introCanvas.style.height = ih + 'px';
-  ictx.setTransform(idpr, 0, 0, idpr, 0, 0);
-  swarm = [];
-  const gap = iw < 700 ? 82 : 96;              /* плотность стены */
-  for (let gy = -0.3; gy < ih + gap; gy += gap) {
-    for (let gx = -0.3; gx < iw + gap; gx += gap) {
-      const jx = (Math.random() - 0.5) * gap * 0.7, jy = (Math.random() - 0.5) * gap * 0.7;
-      swarm.push({
-        x: gx + jx, y: gy + jy, hx: gx + jx, hy: gy + jy,
-        vx: 0, vy: 0,
-        sc: 0.5 + Math.random() * 0.6,
-        rot: (Math.random() - 0.5) * 0.6, vr: 0,
-        ph: Math.random() * 6.28, alpha: 1,
-        flying: false, delay: 0,
-      });
-    }
-  }
-}
-buildSwarm();
-addEventListener('resize', () => { if (introActive) buildSwarm(); });
-
-function triggerDisperse() {
-  if (disperse || !introActive) return;
-  disperse = true; disperseAt = performance.now();
-  document.body.classList.add('revealed');
-  for (const b of swarm) {
-    const dx = b.x - icx, dy = b.y - icy, dist = Math.hypot(dx, dy);
-    b.delay = Math.min(520, dist * 0.4) + Math.random() * 180;   /* волна от курсора */
-  }
-}
-/* запуск разлёта: движение мыши, тач, скролл или таймаут */
-addEventListener('pointermove', (e) => {
-  icx = e.clientX; icy = e.clientY;
-  if (introActive && !disperse && performance.now() - introStart > 350) triggerDisperse();
-}, { passive: true });
-addEventListener('touchstart', (e) => { if (e.touches[0]) { icx = e.touches[0].clientX; icy = e.touches[0].clientY; } triggerDisperse(); }, { passive: true });
-addEventListener('wheel', triggerDisperse, { passive: true });
-setTimeout(() => triggerDisperse(), 6500);
-if (reduceMotion) { introActive = false; introCanvas.style.display = 'none'; introHint.style.display = 'none'; document.body.classList.add('revealed'); }
-
-function introLoop() {
-  if (!introActive) return;
-  requestAnimationFrame(introLoop);
-  const now = performance.now(), t = now / 1000;
-  ictx.clearRect(0, 0, iw, ih);
-  let alive = 0;
-  for (const b of swarm) {
-    const flap = 0.5 + 0.5 * Math.sin(t * 9 + b.ph);
-    if (!disperse) {
-      /* «стена»: лёгкое дыхание + отскок от курсора */
-      b.x = b.hx + Math.sin(t * 1.4 + b.ph) * 3;
-      b.y = b.hy + Math.cos(t * 1.1 + b.ph) * 3;
-      const dx = b.x - icx, dy = b.y - icy, d2 = dx * dx + dy * dy;
-      if (d2 < 140 * 140 && d2 > 1) { const d = Math.sqrt(d2); b.x += dx / d * (140 - d) * 0.15; b.y += dy / d * (140 - d) * 0.15; }
-    } else {
-      if (b.delay > 0) {
-        b.delay -= now - (b._lt || now);
-        b.x = b.hx + Math.sin(t * 1.4 + b.ph) * 3;
-        b.y = b.hy + Math.cos(t * 1.1 + b.ph) * 3;
-      } else {
-        if (!b.flying) {
-          b.flying = true;
-          const dx = b.x - icx, dy = b.y - icy, d = Math.hypot(dx, dy) || 1;
-          const spd = 8 + Math.random() * 12;
-          b.vx = dx / d * spd + (Math.random() - 0.5) * 5;
-          b.vy = dy / d * spd - 5 - Math.random() * 7;   /* вверх */
-          b.vr = (Math.random() - 0.5) * 0.4;
-        }
-        b.vy -= 0.12;                    /* подъём-порхание вверх */
-        b.vx += Math.sin(t * 3 + b.ph) * 0.3;
-        b.vx *= 0.996; b.vy *= 0.994;
-        b.x += b.vx; b.y += b.vy;
-        b.rot += b.vr;
-        b.alpha -= 0.022;
-      }
-    }
-    b._lt = now;
-    if (b.alpha <= 0.01) continue;
-    const onScreen = b.x > -120 && b.x < iw + 120 && b.y > -160 && b.y < ih + 120;
-    if (!onScreen && b.flying) { b.alpha = 0; continue; }
-    alive++;
-    const frame = FRAMES[Math.floor(flap * (FRAMES.length - 1))];
-    const size = SPRITE * b.sc;
-    ictx.save();
-    ictx.globalAlpha = Math.max(0, b.alpha);
-    ictx.translate(b.x, b.y);
-    if (b.flying) ictx.rotate(b.rot + Math.atan2(b.vy, b.vx) + Math.PI / 2);
-    else ictx.rotate(b.rot);
-    ictx.drawImage(frame, -size / 2, -size / 2, size, size);
-    ictx.restore();
-  }
-  if (disperse && alive === 0) {
-    introActive = false;
-    introCanvas.style.display = 'none';
-    introHint.style.display = 'none';
-  }
-}
-introLoop();
-
-/* ============ ПОЯВЛЕНИЕ СЕКЦИЙ ============ */
-const io = new IntersectionObserver((es) => {
-  es.forEach((e, i) => { if (e.isIntersecting) setTimeout(() => e.target.classList.add('in'), i * 110); });
-}, { threshold: 0.12 });
-document.querySelectorAll('.fade').forEach(el => io.observe(el));
+  raf();
+})();
 </script>
 </body>
 </html>
